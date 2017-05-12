@@ -1,4 +1,4 @@
-# GrimoireLab Toolkit
+# GrimoireLab Toolkit [![Build Status](https://travis-ci.org/grimoirelab/grimoirelab-toolkit.svg?branch=master)](https://travis-ci.org/grimoirelab/grimoirelab-toolkit) [![Coverage Status](https://img.shields.io/coveralls/grimoirelab/grimoirelab-toolkit.svg)](https://coveralls.io/r/grimoirelab/grimoirelab-toolkit?branch=master)
 
 Toolkit of common functions used across GrimoireLab projects.
 
