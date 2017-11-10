@@ -139,6 +139,18 @@ class TestStrToDatetime(unittest.TestCase):
         self.assertIsInstance(date, datetime.datetime)
         self.assertEqual(date, expected)
 
+        date = str_to_datetime('Tue, 06 Jun 2006 20:50:46 00200 (CEST)')
+        expected = datetime.datetime(2006, 6, 6, 20, 50, 46,
+                                     tzinfo=dateutil.tz.tzutc())
+        self.assertIsInstance(date, datetime.datetime)
+        self.assertEqual(date, expected)
+
+        date = str_to_datetime('Sat, 2 Aug 2008 04:18:59 +0500\x1b[D\x1b[D\x1b[D\x1b[-\x1b[C\x1b[C\x1b[C\x1b[C)')
+        expected = datetime.datetime(2008, 8, 2, 4, 18, 59,
+                                     tzinfo=dateutil.tz.tzutc())
+        self.assertIsInstance(date, datetime.datetime)
+        self.assertEqual(date, expected)
+
         date = str_to_datetime('Thu, 14 Aug 2008 02:07:59 +0200 +0100')
         expected = datetime.datetime(2008, 8, 14, 2, 7, 59,
                                      tzinfo=dateutil.tz.tzoffset(None, 7200))
