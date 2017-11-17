@@ -115,7 +115,7 @@ def str_to_datetime(ts):
         # timezone section because it cannot be parsed,
         # like in 'Wed, 26 Oct 2005 15:20:32 -0100 (GMT+1)'
         # or in 'Thu, 14 Aug 2008 02:07:59 +0200 CEST'.
-        m = re.search(r"^.+?\s+[\+\-]\d{4}(\s+.+)$", ts)
+        m = re.search(r"^.+?\s+[\+\-\d]\d{4}(\s+.+)$", ts)
         if m:
             ts = ts[:m.start(1)]
 
@@ -123,18 +123,19 @@ def str_to_datetime(ts):
             dt = parse_datetime(ts)
         except ValueError as e:
             # Try to remove the timezone, usually it causes
-            # problems. If it doesn't work, raise an exception
-            m = re.search(r"^(.+?)\s+[\+\-]\d+$", ts)
+            # problems.
+            m = re.search(r"^(.+?)\s+[\+\-\d]\d{4}.*$", ts)
 
-            if not m:
-                raise e
+            if m:
+                dt = parse_datetime(m.group(1))
+                logger.warning("Date %s str does not have a valid timezone", ts)
+                logger.warning("Date converted removing timezone info")
+                return dt
 
-            dt = parse_datetime(m.group(1))
-
-            logger.warning("Date %s str does not have a valid timezone", ts)
-            logger.warning("Date converted removing timezone info")
+            raise e
 
         return dt
+
     except ValueError as e:
         raise InvalidDateError(date=str(ts))
 
