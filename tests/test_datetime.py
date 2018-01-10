@@ -20,13 +20,11 @@
 #
 
 import datetime
-import sys
 import unittest
 
 import dateutil
 import pkg_resources
 
-sys.path.insert(0, '..')
 pkg_resources.declare_namespace('grimoirelab.toolkit')
 
 from grimoirelab.toolkit.datetime import (InvalidDateError,

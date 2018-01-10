@@ -19,12 +19,10 @@
 #     Santiago Dueñas <sduenas@bitergia.com>
 #
 
-import sys
 import unittest
 
 import pkg_resources
 
-sys.path.insert(0, '..')
 pkg_resources.declare_namespace('grimoirelab.toolkit')
 
 from grimoirelab.toolkit.introspect import (inspect_signature_parameters,
