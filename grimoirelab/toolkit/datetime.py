@@ -59,7 +59,7 @@ class InvalidDateError(Exception):
 def datetime_utcnow():
     """Handy function which returns the current date and time in UTC."""
 
-    return datetime.datetime.utcnow()
+    return datetime.datetime.now(datetime.timezone.utc)
 
 
 def datetime_to_utc(ts):

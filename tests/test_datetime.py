@@ -30,7 +30,8 @@ pkg_resources.declare_namespace('grimoirelab.toolkit')
 from grimoirelab.toolkit.datetime import (InvalidDateError,
                                           datetime_to_utc,
                                           str_to_datetime,
-                                          unixtime_to_datetime)
+                                          unixtime_to_datetime,
+                                          datetime_utcnow)
 
 
 class TestInvalidDateError(unittest.TestCase):
@@ -176,6 +177,15 @@ class TestStrToDatetime(unittest.TestCase):
         self.assertRaises(InvalidDateError, str_to_datetime, 'nodate')
         self.assertRaises(InvalidDateError, str_to_datetime, None)
         self.assertRaises(InvalidDateError, str_to_datetime, '')
+
+    def test_datetime_utcnow(self):
+        """Check whether timezone information is added"""
+
+        now = datetime_utcnow()
+        timezone = str(now.tzinfo)
+        expected = "UTC+00:00"
+
+        self.assertTrue(timezone, expected)
 
 
 class TestUnixTimeToDatetime(unittest.TestCase):
