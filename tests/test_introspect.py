@@ -35,6 +35,9 @@ class FakeCallable:
     def __init__(self, *args, **kwargs):
         pass
 
+    def test_args(self, a, **kwargs):
+        pass
+
     def test(self, a, b, c=None):
         pass
 
@@ -115,6 +118,11 @@ class TestFindSignatureParameters(unittest.TestCase):
         """Test if a list of parameters is generated."""
 
         expected = {'a': 1, 'b': 2, 'c': 3}
+        params = {'a': 1, 'b': 2, 'c': 3}
+        found = find_signature_parameters(FakeCallable.test, params)
+        self.assertDictEqual(found, expected)
+
+        expected = {'a': 1, 'b': 2, 'c': 3}
         params = {'a': 1, 'b': 2, 'c': 3, 'd': 4}
         found = find_signature_parameters(FakeCallable.test, params)
         self.assertDictEqual(found, expected)
@@ -122,6 +130,11 @@ class TestFindSignatureParameters(unittest.TestCase):
         expected = {'a': 1, 'b': 2}
         params = {'a': 1, 'b': 2, 'd': 3}
         found = find_signature_parameters(FakeCallable.test, params)
+        self.assertDictEqual(found, expected)
+
+        expected = {'a': 1, 'b': 2}
+        params = {'a': 1, 'b': 2}
+        found = find_signature_parameters(FakeCallable.test_args, params)
         self.assertDictEqual(found, expected)
 
     def test_find_excluding_parameters(self):
