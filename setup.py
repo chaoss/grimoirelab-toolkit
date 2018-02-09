@@ -24,8 +24,10 @@
 import codecs
 import os.path
 import re
+import sys
+import unittest
 
-from setuptools import setup
+from setuptools import setup, Command
 
 
 here = os.path.abspath(os.path.dirname(__file__))
@@ -47,6 +49,25 @@ with codecs.open(version_py, 'r', encoding='utf-8') as fd:
     version = re.search(r'^__version__\s*=\s*[\'"]([^\'"]*)[\'"]',
                         fd.read(), re.MULTILINE).group(1)
 
+
+class TestCommand(Command):
+
+    user_options = []
+    __dir__ = os.path.dirname(os.path.realpath(__file__))
+
+    def initialize_options(self):
+        os.chdir(os.path.join(self.__dir__, 'tests'))
+
+    def finalize_options(self):
+        pass
+
+    def run(self):
+        test_suite = unittest.TestLoader().discover('.', pattern='test*.py')
+        result = unittest.TextTestRunner(buffer=True).run(test_suite)
+        sys.exit(not result.wasSuccessful())
+
+
+cmdclass = {'test': TestCommand}
 
 setup(name="grimoirelab-toolkit",
       description="Toolkit of common functions used across GrimoireLab",
@@ -74,4 +95,5 @@ setup(name="grimoirelab-toolkit",
       install_requires=[
           'python-dateutil>=2.6.0'
       ],
+      cmdclass=cmdclass,
       zip_safe=False)
