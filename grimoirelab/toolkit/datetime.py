@@ -67,7 +67,8 @@ def datetime_to_utc(ts):
 
     Returns the given datetime object converted to a date with
     UTC+0 timezone. For naive datetimes, it will be assumed that
-    they are in UTC+0.
+    they are in UTC+0. When the timezone is wrong, UTC+0 will
+    be set as default (using `dateutil.tz.tzutc` object).
 
     :param dt: timestamp to convert
 
@@ -83,7 +84,14 @@ def datetime_to_utc(ts):
     if not ts.tzinfo:
         ts = ts.replace(tzinfo=dateutil.tz.tzutc())
 
-    return ts.astimezone(dateutil.tz.tzutc())
+    try:
+        ts = ts.astimezone(dateutil.tz.tzutc())
+    except ValueError:
+        logger.warning("Date %s str does not have a valid timezone", ts)
+        logger.warning("Date converted to UTC removing timezone info")
+        ts = ts.replace(tzinfo=dateutil.tz.tzutc()).astimezone(dateutil.tz.tzutc())
+
+    return ts
 
 
 def str_to_datetime(ts):
