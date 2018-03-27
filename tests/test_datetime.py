@@ -182,6 +182,11 @@ class TestStrToDatetime(unittest.TestCase):
         self.assertIsInstance(date, datetime.datetime)
         self.assertEqual(date, expected)
 
+    def test_invalid_unixtime_to_datetime(self):
+        """Check whether it fails with an invalid unixtime."""
+
+        self.assertRaises(InvalidDateError, unixtime_to_datetime, '2017-07-24')
+
     def test_invalid_date(self):
         """Check whether it fails with an invalid date."""
 
