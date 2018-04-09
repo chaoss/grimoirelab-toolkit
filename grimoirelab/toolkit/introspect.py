@@ -31,7 +31,8 @@ import inspect
 
 __all__ = [
     "inspect_signature_parameters",
-    "find_signature_parameters"
+    "find_signature_parameters",
+    "find_class_properties"
 ]
 
 
@@ -99,3 +100,22 @@ def find_signature_parameters(callable_, candidates,
         exec_params = candidates
 
     return exec_params
+
+
+def find_class_properties(cls):
+    """Find property members in a class.
+
+    Returns all the property members of a class in a list of
+    (name, value) pairs. Only those members defined with `property`
+    decorator will be included in the list.
+
+    :param cls: class where property members will be searched
+
+    :returns: list of properties
+    """
+    candidates = inspect.getmembers(cls, inspect.isdatadescriptor)
+    result = [
+        (name, value) for name, value in candidates
+        if isinstance(value, property)
+    ]
+    return result

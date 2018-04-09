@@ -26,7 +26,8 @@ import pkg_resources
 pkg_resources.declare_namespace('grimoirelab.toolkit')
 
 from grimoirelab.toolkit.introspect import (inspect_signature_parameters,
-                                            find_signature_parameters)
+                                            find_signature_parameters,
+                                            find_class_properties)
 
 
 class FakeCallable:
@@ -155,6 +156,60 @@ class TestFindSignatureParameters(unittest.TestCase):
             _ = find_signature_parameters(FakeCallable.test, params)
 
         self.assertEqual(e.exception.args[1], 'b')
+
+
+class PropertiesClass:
+    """Class for testing properties finding."""
+
+    def __init__(self):
+        self.member = "not a property"
+        self._readonly_property = True
+        self._my_property = None
+
+    @property
+    def my_property(self):
+        return self._my_property
+
+    @my_property.setter
+    def my_property(self, value):
+        self._my_property = value
+
+    @property
+    def readonly_property(self):
+        return self._readonly_property
+
+
+class NoPropertiesClass:
+    """Class for testing properties finding."""
+
+    def __init__(self):
+        self.member = "not a property"
+        self.readonly_property = True
+        self.my_property = None
+
+
+class TestFindObjectProperties(unittest.TestCase):
+    """Unit tests for find_class_properties."""
+
+    def test_find_class_properties(self):
+        """Test if properties are found in a class"""
+
+        properties = find_class_properties(PropertiesClass)
+        self.assertEqual(len(properties), 2)
+
+        p = properties[0]
+        self.assertEqual(p[0], 'my_property')
+        self.assertIsInstance(p[1], property)
+
+        p = properties[1]
+        self.assertEqual(p[0], 'readonly_property')
+        self.assertIsInstance(p[1], property)
+
+    def test_find_no_properties(self):
+        """Test if nothing is found in an object with no properties"""
+
+        properties = find_class_properties(NoPropertiesClass())
+        self.assertEqual(len(properties), 0)
 
 
 if __name__ == "__main__":
