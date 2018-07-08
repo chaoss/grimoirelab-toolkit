@@ -21,11 +21,7 @@
 
 import unittest
 
-import pkg_resources
-
-pkg_resources.declare_namespace('grimoirelab.toolkit')
-
-from grimoirelab.toolkit.introspect import (inspect_signature_parameters,
+from grimoirelab_toolkit.introspect import (inspect_signature_parameters,
                                             find_signature_parameters,
                                             find_class_properties)
 

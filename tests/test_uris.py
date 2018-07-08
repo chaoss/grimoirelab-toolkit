@@ -21,11 +21,7 @@
 
 import unittest
 
-import pkg_resources
-
-pkg_resources.declare_namespace('grimoirelab.toolkit')
-
-from grimoirelab.toolkit.uris import urijoin
+from grimoirelab_toolkit.uris import urijoin
 
 
 class TestURIJoin(unittest.TestCase):
