@@ -24,11 +24,8 @@ import sys
 import unittest
 
 import dateutil
-import pkg_resources
 
-pkg_resources.declare_namespace('grimoirelab.toolkit')
-
-from grimoirelab.toolkit.datetime import (InvalidDateError,
+from grimoirelab_toolkit.datetime import (InvalidDateError,
                                           datetime_to_utc,
                                           str_to_datetime,
                                           unixtime_to_datetime,

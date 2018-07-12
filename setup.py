@@ -32,7 +32,7 @@ from setuptools import setup, Command
 
 here = os.path.abspath(os.path.dirname(__file__))
 readme_md = os.path.join(here, 'README.md')
-version_py = os.path.join(here, 'grimoirelab', 'toolkit', '_version.py')
+version_py = os.path.join(here, 'grimoirelab_toolkit', '_version.py')
 
 # Pypi wants the description to be in reStrcuturedText, but
 # we have it in Markdown.
@@ -72,7 +72,7 @@ cmdclass = {'test': TestCommand}
 setup(name="grimoirelab-toolkit",
       description="Toolkit of common functions used across GrimoireLab",
       long_description=long_description,
-      url="https://github.com/grimoirelab/grimoirelab-toolkit",
+      url="https://github.com/chaoss/grimoirelab-toolkit",
       version=version,
       author="Bitergia",
       author_email="sduenas@bitergia.com",
@@ -86,11 +86,7 @@ setup(name="grimoirelab-toolkit",
       ],
       keywords="development grimoirelab",
       packages=[
-          'grimoirelab',
-          'grimoirelab.toolkit',
-      ],
-      namespaces=[
-          'grimoirelab.toolkit'
+          'grimoirelab_toolkit',
       ],
       install_requires=[
           'python-dateutil>=2.6.0'
