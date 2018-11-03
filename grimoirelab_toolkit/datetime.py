@@ -37,7 +37,7 @@ import dateutil.tz
 
 __all__ = [
     "InvalidDateError", "datetime_utcnow", "datetime_to_utc",
-    "str_to_datetime", "unixtime_to_datetime"
+    "str_to_datetime", "datetime_to_str", "unixtime_to_datetime"
 ]
 
 logger = logging.getLogger(__name__)
@@ -47,6 +47,19 @@ class InvalidDateError(Exception):
     """Exception raised when a date is invalid"""
 
     message = "%(date)s is not a valid date"
+
+    def __init__(self, **kwargs):
+        super().__init__()
+        self.msg = self.message % kwargs
+
+    def __str__(self):
+        return self.msg
+
+
+class InvalidDateFormatError(Exception):
+    """Exception raised when a date format is invalid"""
+
+    message = "%(format)s is not a valid date format"
 
     def __init__(self, **kwargs):
         super().__init__()
@@ -92,6 +105,33 @@ def datetime_to_utc(ts):
         ts = ts.replace(tzinfo=dateutil.tz.tzutc()).astimezone(dateutil.tz.tzutc())
 
     return ts
+
+
+def datetime_to_str(dt, frmt='%Y%m%d%H%M%S'):
+    """Convert a datetime object to a string.
+
+    This function transforms a datetime object to timestamp and then
+    format it to a string according to the param `frmt`.
+
+    :param dt: datatime object
+    :param frmt: string date format, by default '%Y%m%d%H%M%S'
+
+    :returns: a string date with format `frmt`
+    """
+    if not frmt:
+        raise InvalidDateFormatError(format=frmt)
+
+    timestamp = dt.timestamp()
+    dt = unixtime_to_datetime(timestamp)
+
+    str_time = dt.strftime(frmt)
+
+    try:
+        _ = dateutil.parser.parse(str_time)
+    except ValueError:
+        raise InvalidDateFormatError(format=frmt)
+
+    return str_time
 
 
 def str_to_datetime(ts):

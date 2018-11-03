@@ -26,7 +26,9 @@ import unittest
 import dateutil
 
 from grimoirelab_toolkit.datetime import (InvalidDateError,
+                                          InvalidDateFormatError,
                                           datetime_to_utc,
+                                          datetime_to_str,
                                           str_to_datetime,
                                           unixtime_to_datetime,
                                           datetime_utcnow)
@@ -39,6 +41,16 @@ class TestInvalidDateError(unittest.TestCase):
 
         e = InvalidDateError(date='1900-13-01')
         self.assertEqual('1900-13-01 is not a valid date',
+                         str(e))
+
+
+class TestInvalidDateFormatError(unittest.TestCase):
+
+    def test_message(self):
+        """Make sure that prints the correct error"""
+
+        e = InvalidDateFormatError(format='unknown')
+        self.assertEqual('unknown is not a valid date format',
                          str(e))
 
 
@@ -94,6 +106,66 @@ class TestDatetimeToUTC(unittest.TestCase):
         self.assertRaises(InvalidDateError, datetime_to_utc, "2016-01-01 01:00:00 +0800")
         self.assertRaises(InvalidDateError, datetime_to_utc, None)
         self.assertRaises(InvalidDateError, datetime_to_utc, 1)
+
+
+class TestDatetimeToStr(unittest.TestCase):
+    """Unit tests for datetime_to_str"""
+
+    def test_dates(self):
+        """Check if it converts some datetime objects to str."""
+
+        date = datetime.datetime(2001, 12, 1, tzinfo=dateutil.tz.tzutc())
+        date_str = datetime_to_str(date)
+        expected = '20011201000000'
+        self.assertEqual(date_str, expected)
+
+        date = datetime.datetime(2001, 12, 1, tzinfo=dateutil.tz.tzutc())
+        date_str = datetime_to_str(date, '%Y%m%d')
+        expected = '20011201'
+        self.assertEqual(date_str, expected)
+
+        date = datetime.datetime(2001, 1, 13, tzinfo=dateutil.tz.tzutc())
+        date_str = datetime_to_str(date, '%Y-%m-%d %H:%M:%S')
+        expected = '2001-01-13 00:00:00'
+        self.assertEqual(date_str, expected)
+
+        date = datetime.datetime(2001, 12, 1, 23, 15, 32,
+                                 tzinfo=dateutil.tz.tzoffset(None, -21600))
+        date_str = datetime_to_str(date, '%Y-%m-%d %H:%M:%S')
+        expected = '2001-12-02 05:15:32'
+        self.assertEqual(date_str, expected)
+
+        date = datetime.datetime(2005, 10, 26, 15, 20, 32,
+                                 tzinfo=dateutil.tz.tzoffset(None, -3600))
+        date_str = datetime_to_str(date, '%Y-%m-%d %H:%M:%S')
+        expected = '2005-10-26 16:20:32'
+        self.assertEqual(date_str, expected)
+
+        date = datetime.datetime(2009, 7, 22, 11, 15, 50,
+                                 tzinfo=dateutil.tz.tzoffset(None, 10800))
+        date_str = datetime_to_str(date, '%Y-%m-%d %H:%M:%S')
+        expected = '2009-07-22 08:15:50'
+        self.assertEqual(date_str, expected)
+
+        date = datetime.datetime(2008, 8, 14, 2, 7, 59,
+                                 tzinfo=dateutil.tz.tzoffset(None, 7200))
+        date_str = datetime_to_str(date, '%Y-%m-%d %H:%M:%S')
+        expected = '2008-08-14 00:07:59'
+        self.assertEqual(date_str, expected)
+
+    def test_invalid_format(self):
+        """Check whether it fails with invalid formats."""
+
+        date = datetime.datetime(2001, 12, 1, tzinfo=dateutil.tz.tzutc())
+
+        with self.assertRaises(InvalidDateFormatError):
+            _ = datetime_to_str(date, None)
+
+        with self.assertRaises(InvalidDateFormatError):
+            _ = datetime_to_str(date, '')
+
+        with self.assertRaises(InvalidDateFormatError):
+            _ = datetime_to_str(date, 'unknown')
 
 
 class TestStrToDatetime(unittest.TestCase):
