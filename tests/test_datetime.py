@@ -20,7 +20,6 @@
 #
 
 import datetime
-import sys
 import unittest
 
 import dateutil
@@ -68,23 +67,6 @@ class TestDatetimeToUTC(unittest.TestCase):
         expected = datetime.datetime(2001, 12, 1, 23, 15, 32,
                                      tzinfo=dateutil.tz.tzutc())
         utc = datetime_to_utc(date)
-        self.assertIsInstance(utc, datetime.datetime)
-        self.assertEqual(utc, expected)
-
-    def test_invalid_timezone(self):
-        """Check whether an invalid timezone is converted to UTC+0"""
-
-        # Python 3.6 does not put any restriction on the offset range.
-        # Thus, this test is valid only for prior Python versions.
-        if sys.version_info.major == 3 and sys.version_info.minor == 6:
-            return
-
-        date = datetime.datetime(2001, 12, 1, 23, 15, 32,
-                                 tzinfo=dateutil.tz.tzoffset(None, -3407))
-        expected = datetime.datetime(2001, 12, 1, 23, 15, 32,
-                                     tzinfo=dateutil.tz.tzutc())
-        utc = datetime_to_utc(date)
-
         self.assertIsInstance(utc, datetime.datetime)
         self.assertEqual(utc, expected)
 
