@@ -89,7 +89,7 @@ setup(name="grimoirelab-toolkit",
           'grimoirelab_toolkit',
       ],
       install_requires=[
-          'python-dateutil>=2.6.0'
+          'python-dateutil>=2.8.0'
       ],
       cmdclass=cmdclass,
       zip_safe=False)
