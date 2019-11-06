@@ -136,11 +136,21 @@ def str_to_datetime(ts):
 
             if m:
                 dt = parse_datetime(m.group(1))
-                logger.warning("Date %s str does not have a valid timezone", ts)
-                logger.warning("Date converted removing timezone info")
+                logger.warning("Date %s does not have a valid timezone. "
+                               "Date converted removing timezone info", ts)
                 return dt
 
             raise e
+
+        try:
+            # Check that the offset is between -timedelta(hours=24) and
+            # timedelta(hours=24). If it is not the case, convert the
+            # date to UTC and remove the timezone info.
+            _ = dt.astimezone(dateutil.tz.tzutc())
+        except ValueError:
+            logger.warning("Date %s does not have a valid timezone; timedelta not in range. "
+                           "Date converted to UTC removing timezone info", ts)
+            dt = dt.replace(tzinfo=dateutil.tz.tzutc()).astimezone(dateutil.tz.tzutc())
 
         return dt
 
