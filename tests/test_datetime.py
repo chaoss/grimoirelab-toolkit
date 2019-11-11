@@ -161,6 +161,12 @@ class TestStrToDatetime(unittest.TestCase):
         self.assertIsInstance(date, datetime.datetime)
         self.assertEqual(date, expected)
 
+        date = str_to_datetime('Sun, 28 Feb 1999 19:17:37 -7700 (EST)')
+        expected = datetime.datetime(1999, 2, 28, 19, 17, 37,
+                                     tzinfo=dateutil.tz.tzutc())
+        self.assertIsInstance(date, datetime.datetime)
+        self.assertEqual(date, expected)
+
     def test_invalid_unixtime_to_datetime(self):
         """Check whether it fails with an invalid unixtime."""
 
