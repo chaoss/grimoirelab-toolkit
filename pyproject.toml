@@ -1,0 +1,48 @@
+[tool.poetry]
+name = "grimoirelab-toolkit"
+version = "0.1.12"
+description = "Toolkit of common functions used across GrimoireLab"
+authors = [
+    "GrimoireLab Developers"
+]
+license = "GPL-3.0+"
+
+readme = "README.md"
+
+homepage = "https://chaoss.github.io/grimoirelab/"
+repository = "https://github.com/chaoss/grimoirelab-toolkit"
+
+keywords = [
+    "development",
+    "grimoirelab"
+]
+
+packages = [
+    { include = "grimoirelab_toolkit" },
+    { include = "tests", format = "sdist" },
+]
+
+include = [
+    "AUTHORS",
+    "README.md",
+    "LICENSE",
+    "NEWS"
+]
+
+classifiers = [
+   "Development Status :: 4 - Beta",
+   "Intended Audience :: Developers",
+   "Topic :: Software Development",
+   "License :: OSI Approved :: GNU General Public License v3 or later (GPLv3+)",
+   "Programming Language :: Python :: 3"
+]
+
+[tool.poetry.dependencies]
+python = "^3.6"
+python-dateutil = "^2.8.0"
+
+[tool.poetry.dev-dependencies]
+
+[build-system]
+requires = ["poetry>=0.12"]
+build-backend = "poetry.masonry.api"
