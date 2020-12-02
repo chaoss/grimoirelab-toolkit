@@ -1,0 +1,45 @@
+name: build
+
+on: [push, pull_request]
+
+jobs:
+  build:
+    
+    runs-on: ubuntu-latest
+    strategy:
+      matrix:
+        python-version: [3.6, 3.7, 3.8]
+    
+    name: Python ${{ matrix.python-version }}
+    steps:
+      - uses: actions/checkout@v2
+      
+      - name: Set up Python ${{ matrix.python-version }}
+        uses: actions/setup-python@v2
+        with:
+          python-version: ${{ matrix.python-version }}
+      
+      - name: Install dependencies
+        run: |
+          pip install --upgrade setuptools==49.6.0
+          pip install --upgrade pip==18.1
+          pip install --upgrade wheel
+          pip install -r "requirements.txt"
+          pip install -r "requirements_tests.txt"
+          pip install flake8 coveralls
+          pip install --upgrade wheel
+      
+      - name: Install
+        run: ./setup.py install
+      
+      - name: Lint with flake8
+        run: |
+          flake8 .
+      
+      - name: Tests and coverage
+        run: |
+          cd tests
+          coverage run --source=grimoirelab_toolkit run_tests.py
+      
+      - name: Coveralls report
+        run: coveralls
