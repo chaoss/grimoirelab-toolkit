@@ -3,7 +3,7 @@ name: build
 on: [push, pull_request]
 
 jobs:
-  build:
+  tests:
     
     runs-on: ubuntu-latest
     strategy:
@@ -27,7 +27,6 @@ jobs:
           pip install -r "requirements.txt"
           pip install -r "requirements_tests.txt"
           pip install flake8 coveralls
-          pip install --upgrade wheel
       
       - name: Install
         run: ./setup.py install
@@ -36,10 +35,12 @@ jobs:
         run: |
           flake8 .
       
-      - name: Tests and coverage
+      - name: Tests and Coverage
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
         run: |
           cd tests
           coverage run --source=grimoirelab_toolkit run_tests.py
-      
-      - name: Coveralls report
-        run: coveralls
+          # --service=github is a workaround for bug
+          # https://github.com/coveralls-clients/coveralls-python/issues/251
+          coveralls --service=github
