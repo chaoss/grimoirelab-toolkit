@@ -1,2 +1,2 @@
 python-dateutil>=2.8.0
-setuptools>=30.3.0
+setuptools>=30.3.0,<50
