@@ -74,6 +74,17 @@ class TestDatetimeToUTC(unittest.TestCase):
         self.assertIsInstance(utc, datetime.datetime)
         self.assertEqual(utc, expected)
 
+    def test_invalid_timezone(self):
+        """ Check whether datetime converts to UTC when timezone invalid """
+
+        date = datetime.datetime(2001, 12, 1, 23, 15, 32,
+                                 tzinfo=dateutil.tz.tzoffset(None, 93600))
+        expected = datetime.datetime(2001, 12, 1, 23, 15, 32,
+                                     tzinfo=dateutil.tz.tzutc())
+        utc = datetime_to_utc(date)
+        self.assertIsInstance(utc, datetime.datetime)
+        self.assertEqual(utc, expected)
+
     def test_invalid_datetime(self):
         """Check if it raises an exception on invalid instances."""
 
