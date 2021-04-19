@@ -42,6 +42,8 @@ python = "^3.6"
 python-dateutil = "^2.8.0"
 
 [tool.poetry.dev-dependencies]
+flake8 = "^3.9.1"
+coverage = "^5.5"
 
 [build-system]
 requires = [
