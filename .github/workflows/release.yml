@@ -28,7 +28,7 @@ jobs:
           name: toolkit-dist
           path: dist
   
-  test:
+  tests:
     needs: [build]
     runs-on: ubuntu-latest
     strategy:
@@ -52,7 +52,7 @@ jobs:
           cd tests && python run_tests.py
   
   release:
-    needs: [test]
+    needs: [tests]
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v2
@@ -70,7 +70,7 @@ jobs:
           body_path: ./releases/${{ steps.tag.outputs.tag }}.md
   
   publish:
-    needs: [test]
+    needs: [tests]
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v2
