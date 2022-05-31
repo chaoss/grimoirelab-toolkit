@@ -8,7 +8,7 @@ URIs/URLs, among other topics.
 
 ## Requirements
 
-* Python >= 3.4
+* Python >= 3.7
 * python3-dateutil >= 2.6
 
 ## Installation

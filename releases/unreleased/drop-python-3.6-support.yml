@@ -1,0 +1,10 @@
+---
+title: Drop Python 3.6 support
+category: removed
+author: Venu Vardhan Reddy Tekula <venu@chaoss.community>
+issue: null
+notes: >
+    Python 3.6 has reached the end of life in Dec 2021.
+    This means it won't receive any further patches to
+    fix the secutiry issues. So, dropping the support
+    of 3.6 and it now supports Python>=3.7 version only. 
