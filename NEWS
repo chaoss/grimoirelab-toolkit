@@ -1,5 +1,16 @@
 # Releases
 
+## grimoirelab-toolkit 0.3.0 - (2022-05-31)
+
+**Feature removals:**
+
+ * Drop Python 3.6 support\
+   Python 3.6 has reached the end of life in Dec 2021. This means it
+   won't receive any further patches to fix the secutiry issues. So,
+   dropping the support of 3.6 and it now supports Python>=3.7 version
+   only.
+
+
 ## grimoirelab-toolkit 0.2.0 - (2021-04-20)
 
 **Security fixes:**
@@ -16,3 +27,4 @@
 * This first release contains common functions used across other
   GrimoireLab projects. These functions handle datetime objects,
   URIs/URLs and high-level introspection tools.
+
