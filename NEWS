@@ -1,5 +1,9 @@
 # Releases
 
+  ## grimoirelab-toolkit 0.4.3 - (2024-03-01)
+  
+  * Update Poetry's package dependencies
+
   ## grimoirelab-toolkit 0.4.2 - (2024-01-30)
   
   * Update Poetry's package dependencies
