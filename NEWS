@@ -1,5 +1,13 @@
 # Releases
 
+## grimoirelab-toolkit 1.0.0-rc.1 - (2024-04-09)
+
+**New features:**
+
+ * First major release\
+   GrimoireLab reached a stable status. This is our first major release.
+
+
   ## grimoirelab-toolkit 0.4.5 - (2024-03-27)
   
   * Update Poetry's package dependencies
