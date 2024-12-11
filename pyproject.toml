@@ -1,6 +1,6 @@
 [tool.poetry]
 name = "grimoirelab-toolkit"
-version = "1.0.7"
+version = "1.0.8-rc.1"
 description = "Toolkit of common functions used across GrimoireLab"
 authors = [
     "GrimoireLab Developers"
