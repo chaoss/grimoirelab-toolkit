@@ -1,5 +1,9 @@
 # Releases
 
+  ## grimoirelab-toolkit 1.0.11 - (2025-06-03)
+  
+  * Update Poetry's package dependencies
+
   ## grimoirelab-toolkit 1.0.10 - (2025-04-09)
   
   * Update Poetry's package dependencies
