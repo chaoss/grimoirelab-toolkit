@@ -175,7 +175,7 @@ def unixtime_to_datetime(ut):
         converted into a valid date
     """
     try:
-        dt = datetime.datetime.utcfromtimestamp(ut)
+        dt = datetime.datetime.fromtimestamp(ut, datetime.timezone.utc)
         dt = dt.replace(tzinfo=dateutil.tz.tzutc())
         return dt
     except Exception:
