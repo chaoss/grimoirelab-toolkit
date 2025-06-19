@@ -1,8 +1,0 @@
----
-title: Deprecated utcfromtimestamp updated
-category: fixed
-author: Jose Javier Merchante <jjmerchante@bitergia.com>
-issue: null
-notes: >
-  Class method `utcfromtimestamp` was deprecated in Python 3.12
-  and it recommends using `fromtimestamp` with UTC instead.
