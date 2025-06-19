@@ -1,5 +1,14 @@
 # Releases
 
+## grimoirelab-toolkit 1.0.13 - (2025-06-19)
+
+**Bug fixes:**
+
+ * Deprecated utcfromtimestamp updated\
+   Class method `utcfromtimestamp` was deprecated in Python 3.12 and it
+   recommends using `fromtimestamp` with UTC instead.
+
+
   ## grimoirelab-toolkit 1.0.12 - (2025-06-18)
   
   * Update Poetry's package dependencies
