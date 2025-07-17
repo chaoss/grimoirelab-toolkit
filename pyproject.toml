@@ -1,6 +1,6 @@
 [tool.poetry]
 name = "grimoirelab-toolkit"
-version = "1.0.8"
+version = "1.0.13"
 description = "Toolkit of common functions used across GrimoireLab"
 authors = [
     "GrimoireLab Developers"
@@ -40,7 +40,7 @@ classifiers = [
 python = "^3.9"
 python-dateutil = "^2.8.2"
 
-[tool.poetry.dev-dependencies]
+[tool.poetry.group.dev.dependencies]
 flake8 = "^7.1.1"
 coverage = "^7.2.3"
 
