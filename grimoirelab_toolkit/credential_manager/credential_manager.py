@@ -90,7 +90,7 @@ def main():
 
     try:
         secret = get_secret(args.manager, args.service, args.credential)
-        print(f"Retrieved {args.credential} for {args.service}: {secret}")
+        # print(f"Retrieved {args.credential} for {args.service}: {secret}")
     except Exception as e:
         _logger.error("Failed to retrieve secret: %s", e)
         sys.exit(1)
