@@ -81,8 +81,9 @@ class BitwardenManager:
                 return self.session_key
 
             _logger.debug("Checking Bitwarden login status")
+            # bw has to be in PATH
             status_result = subprocess.run(
-                ["/snap/bin/bw", "status"], capture_output=True, text=True, check=False
+                ["bw", "status"], capture_output=True, text=True, check=False
             )
 
             if status_result.returncode == 0:
@@ -175,7 +176,7 @@ class BitwardenManager:
         """Checks current session."""
         try:
             status_result = subprocess.run(
-                ["/snap/bin/bw", "status"], capture_output=True, text=True, check=False
+                ["bw", "status"], capture_output=True, text=True, check=False
             )
 
             if status_result.returncode != 0:
@@ -202,7 +203,7 @@ class BitwardenManager:
         try:
             _logger.debug("Syncing vault")
             subprocess.run(
-                ["/snap/bin/bw", "sync", "--session", self.session_key], check=True
+                ["bw", "sync", "--session", self.session_key], check=True
             )
             self.last_sync_time = datetime.now()
         except subprocess.CalledProcessError as e:
@@ -224,7 +225,6 @@ class BitwardenManager:
         try:
             _logger.info("Retrieving credential from Bitwarden CLI: %s", service_name)
 
-            bw_path = "/snap/bin/bw"
 
             _logger.debug("Session key = %s", self.session_key or "None")
             
@@ -235,7 +235,7 @@ class BitwardenManager:
             
             # Get list of items
             list_items = subprocess.run(
-                [bw_path, "list", "items", "--session", self.session_key],
+                ["bw", "list", "items", "--session", self.session_key],
                 capture_output=True,
                 text=True,
                 check=False,
@@ -264,7 +264,7 @@ class BitwardenManager:
             # Retrieve exact match by id
             item_id = match_item.get("id")
             result = subprocess.run(
-                [bw_path, "get", "item", item_id, "--session", self.session_key],
+                ["bw", "get", "item", item_id, "--session", self.session_key],
                 capture_output=True,
                 text=True,
                 check=False,
