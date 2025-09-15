@@ -105,6 +105,11 @@ def main():
         "service", help="The name of the service for which to retrieve the credential."
     )
     parser.add_argument("credential", help="The name of the credential to retrieve.")
+    parser.add_argument(
+        "--debug",
+        action="store_true",
+        help="Enable debug logging"
+    )
 
     args = parser.parse_args()
 
@@ -114,8 +119,8 @@ def main():
 
     try:
         secret = get_secret(args.manager, args.service, args.credential)
-        return secret
-        # print(f"Retrieved {args.credential} for {args.service}: {secret}")
+        # return secret
+        print(f"Retrieved {args.credential} for {args.service}: {secret}")
     except Exception as e:
         _logger.error("Failed to retrieve secret: %s", e)
         sys.exit(1)
