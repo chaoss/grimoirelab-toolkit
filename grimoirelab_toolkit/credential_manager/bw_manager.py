@@ -98,7 +98,7 @@ class BitwardenManager:
                     elif status.get("status") == "locked":
                         _logger.debug("Vault locked, unlocking")
                         unlock_result = subprocess.run(
-                            ["/snap/bin/bw", "unlock", bw_password, "--raw"],
+                            ["bw", "unlock", bw_password, "--raw"],
                             capture_output=True,
                             text=True,
                             check=False,
@@ -151,7 +151,7 @@ class BitwardenManager:
                 if self._should_sync():
                     _logger.debug("Syncing local vault with Bitwarden")
                     sync_result = subprocess.run(
-                        ["/snap/bin/bw", "sync", "--session", self.session_key],
+                        ["bw", "sync", "--session", self.session_key],
                         capture_output=True,
                         text=True,
                         check=False,
