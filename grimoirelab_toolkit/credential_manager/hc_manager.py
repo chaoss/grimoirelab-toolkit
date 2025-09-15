@@ -58,9 +58,13 @@ class HashicorpManager:
 
         if self.client.sys.is_initialized():
             _logger.debug("Client is initialized")
+        else:
+            raise Exception("Vault client is not initialized")
 
         if self.client.is_authenticated():
             _logger.debug("Client is authenticated")
+        else:
+            raise Exception("Client authentication failed")
 
     def _retrieve_credentials(self, service_name: str) -> dict:
         """
