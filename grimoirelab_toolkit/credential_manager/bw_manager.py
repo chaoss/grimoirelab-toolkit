@@ -125,7 +125,7 @@ class BitwardenManager:
                 else:
                     _logger.debug("Login in: %s", bw_email)
                     result = subprocess.run(
-                        ["/snap/bin/bw", "login", bw_email, bw_password, "--raw"],
+                        ["bw", "login", bw_email, bw_password, "--raw"],
                         capture_output=True,
                         text=True,
                         check=False,
