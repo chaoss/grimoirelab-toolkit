@@ -56,7 +56,7 @@ class BitwardenManager:
         except FileNotFoundError:
             _logger.error("File not found")
 
-    def _login(self, bw_email: str, bw_password: str) -> str:
+    def _login(self, bw_email: str, bw_password: str) -> str | None:
         """
         Logs into Bitwarden and obtains a session key.
 
@@ -112,17 +112,17 @@ class BitwardenManager:
                             # Handle specific authentication errors
                             if "invalid_grant" in error_msg.lower():
                                 _logger.error("Invalid credentials provided for Bitwarden")
-                            return ""
+                            return None
 
                         session_key = unlock_result.stdout.strip() if unlock_result.stdout else ""
                         if not session_key:
                             _logger.error("Empty session key received from unlock command")
-                            return ""
+                            return
                         self.session_key = session_key
 
                     if not self.session_key:
                         _logger.debug("Couldn't obtain session key during login")
-                        return ""
+                        return None
 
                 else:
                     _logger.debug("Login in: %s", bw_email)
@@ -139,13 +139,13 @@ class BitwardenManager:
                         # Handle specific authentication errors
                         if "invalid_grant" in error_msg.lower():
                             _logger.error("Invalid credentials provided for Bitwarden")
-                        return ""
+                        return None
 
                     _logger.debug("Setting session key")
                     session_key = result.stdout.strip() if result.stdout else ""
                     if not session_key:
                         _logger.error("Empty session key received from login command")
-                        return ""
+                        return None
                     self.session_key = session_key
 
             if self.session_key:
@@ -166,7 +166,7 @@ class BitwardenManager:
                 return self.session_key
 
             _logger.debug("Session key not found cause could not log in")
-            return ""
+            return None
 
         except Exception as e:
             _logger.error("There was a problem login in: %s", e)
@@ -338,7 +338,7 @@ class BitwardenManager:
                 "The credential %s:%s, was not found.", service_name, credential_name
             )
             _logger.error("In the meantime here you got an empty string")
-            return ""
+            return None
         else:
             # Return the requested credential
             return secret
