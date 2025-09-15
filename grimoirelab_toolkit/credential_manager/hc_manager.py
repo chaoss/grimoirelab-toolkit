@@ -48,7 +48,7 @@ class HashicorpManager:
             Exception: If couldn't inizialize the client
         """
         try:
-            _logger.info("Creating client and logging in.")
+            _logger.debug("Creating client and logging in.")
             self.client = hvac.Client(url=vault_url, token=token, verify=certificate)
 
         except Exception as e:
@@ -57,10 +57,10 @@ class HashicorpManager:
             raise e
 
         if self.client.sys.is_initialized():
-            _logger.info("Client is initialized")
+            _logger.debug("Client is initialized")
 
         if self.client.is_authenticated():
-            _logger.info("Client is authenticated")
+            _logger.debug("Client is authenticated")
 
     def _retrieve_credentials(self, service_name: str) -> dict:
         """
@@ -103,6 +103,7 @@ class HashicorpManager:
             credentials = self._retrieve_credentials(service_name)
             # We get the exact credential from the dict returned by the retrieval
             credential = credentials["data"]["data"][credential_name]
+            _logger.info("Credentials retrieved succesfully")
             return credential
         except (
             hvac.exceptions.Forbidden,
