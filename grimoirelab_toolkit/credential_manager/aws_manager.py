@@ -24,11 +24,6 @@ import json
 import boto3
 from botocore.exceptions import EndpointConnectionError, SSLError, ClientError
 
-logging.getLogger("urllib3").setLevel(logging.WARNING)
-logging.getLogger("botocore").setLevel(logging.WARNING)
-logging.basicConfig(
-    level=logging.INFO, format="%(asctime)s - %(levelname)s - %(message)s"
-)
 _logger = logging.getLogger(__name__)
 
 

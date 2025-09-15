@@ -24,9 +24,7 @@ import subprocess
 import logging
 from datetime import datetime, timedelta
 
-logging.basicConfig(
-    level=logging.DEBUG, format="%(asctime)s - %(levelname)s - %(message)s"
-)
+
 _logger = logging.getLogger(__name__)
 
 

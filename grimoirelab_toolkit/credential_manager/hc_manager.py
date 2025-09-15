@@ -23,9 +23,6 @@ import logging
 import hvac
 import hvac.exceptions
 
-logging.basicConfig(
-    level=logging.DEBUG, format="%(asctime)s - %(levelname)s - %(message)s"
-)
 _logger = logging.getLogger(__name__)
 
 

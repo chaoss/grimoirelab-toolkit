@@ -24,9 +24,9 @@ import sys
 
 from .secrets_manager_factory import SecretsManagerFactory
 
-logging.basicConfig(
-    level=logging.DEBUG, format="%(asctime)s - %(levelname)s - %(message)s"
-)
+CREDENTIAL_MANAGER_LOG_FORMAT = "%(asctime)s - %(levelname)s - %(message)s"
+CREDENTIAL_MANAGER_DEBUG_LOG_FORMAT = "[%(asctime)s - %(name)s - %(levelname)s] - %(message)s"
+
 _logger = logging.getLogger(__name__)
 
 
@@ -68,6 +68,26 @@ def get_secret(
         raise
 
 
+def configure_logging(debug=False):
+    """Configure credential_manager logging
+
+    The function configures the log messages produced by Credential_manager.
+    By default, log messages are sent to stderr. Set the parameter
+    `debug` to activate the debug mode.
+
+    :param debug: set the debug mode
+    """
+    if not debug:
+        logging.basicConfig(level=logging.INFO,
+                            format=CREDENTIAL_MANAGER_LOG_FORMAT)
+        logging.getLogger('requests').setLevel(logging.WARNING)
+        logging.getLogger('urllib3').setLevel(logging.WARNING)
+        logging.getLogger('boto3').setLevel(logging.WARNING)
+        logging.getLogger('botocore').setLevel(logging.WARNING)
+    else:
+        logging.basicConfig(level=logging.DEBUG,
+                            format=CREDENTIAL_MANAGER_DEBUG_LOG_FORMAT)
+
 def main():
     """
     Main entry point for the command line interface.
@@ -87,6 +107,10 @@ def main():
     parser.add_argument("credential", help="The name of the credential to retrieve.")
 
     args = parser.parse_args()
+
+    configure_logging(args.debug)
+
+    logging.info("Starting credental manager.")
 
     try:
         secret = get_secret(args.manager, args.service, args.credential)
