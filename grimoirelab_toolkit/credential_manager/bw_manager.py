@@ -80,24 +80,24 @@ class BitwardenManager:
                     self._sync_vault()
                 return self.session_key
 
-            _logger.info("Checking Bitwarden login status")
+            _logger.debug("Checking Bitwarden login status")
             status_result = subprocess.run(
                 ["/snap/bin/bw", "status"], capture_output=True, text=True, check=False
             )
 
             if status_result.returncode == 0:
-                _logger.info("Checking vault status")
+                _logger.debug("Checking vault status")
                 status = json.loads(status_result.stdout)
 
                 if status.get("userEmail") == bw_email:
-                    _logger.info("User was already authenticated: %s", bw_email)
+                    _logger.debug("User was already authenticated: %s", bw_email)
 
                     if status.get("status") == "unlocked":
-                        _logger.info("Vault unlocked, getting session key")
+                        _logger.debug("Vault unlocked, getting session key")
                         self.session_key = status.get("sessionKey")
 
                     elif status.get("status") == "locked":
-                        _logger.info("Vault locked, unlocking")
+                        _logger.debug("Vault locked, unlocking")
                         unlock_result = subprocess.run(
                             ["/snap/bin/bw", "unlock", bw_password, "--raw"],
                             capture_output=True,
@@ -120,11 +120,11 @@ class BitwardenManager:
                         self.session_key = session_key
 
                     if not self.session_key:
-                        _logger.info("Couldn't obtain session key during login")
+                        _logger.debug("Couldn't obtain session key during login")
                         return ""
 
                 else:
-                    _logger.info("Login in: %s", bw_email)
+                    _logger.debug("Login in: %s", bw_email)
                     result = subprocess.run(
                         ["/snap/bin/bw", "login", bw_email, bw_password, "--raw"],
                         capture_output=True,
@@ -140,7 +140,7 @@ class BitwardenManager:
                             _logger.error("Invalid credentials provided for Bitwarden")
                         return ""
 
-                    _logger.info("Setting session key")
+                    _logger.debug("Setting session key")
                     session_key = result.stdout.strip() if result.stdout else ""
                     if not session_key:
                         _logger.error("Empty session key received from login command")
@@ -150,7 +150,7 @@ class BitwardenManager:
             if self.session_key:
                 # Only sync if needed based on time interval
                 if self._should_sync():
-                    _logger.info("Syncing local vault with Bitwarden")
+                    _logger.debug("Syncing local vault with Bitwarden")
                     sync_result = subprocess.run(
                         ["/snap/bin/bw", "sync", "--session", self.session_key],
                         capture_output=True,
@@ -161,10 +161,10 @@ class BitwardenManager:
                         self.last_sync_time = datetime.now()
                     else:
                         error_msg = sync_result.stderr.strip() if sync_result.stderr else "Unknown sync error"
-                        _logger.warning("Sync failed but continuing: %s", error_msg)
+                        _logger.debug("Sync failed but continuing: %s", error_msg)
                 return self.session_key
 
-            _logger.info("Session key not found cause could not log in")
+            _logger.debug("Session key not found cause could not log in")
             return ""
 
         except Exception as e:
@@ -200,7 +200,7 @@ class BitwardenManager:
     def _sync_vault(self) -> None:
         """Syncs the vault and updates last sync time."""
         try:
-            _logger.info("Syncing vault")
+            _logger.debug("Syncing vault")
             subprocess.run(
                 ["/snap/bin/bw", "sync", "--session", self.session_key], check=True
             )
