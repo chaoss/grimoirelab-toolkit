@@ -1,0 +1,11 @@
+---
+title: Identity management functions
+category: added
+author: Jose Javier Merchante <jjmerchante@bitergia.com>
+issue: null
+notes: >
+  Introduce a new module for managing identities.
+  It includes functions to generate a UUID based on identity
+  data and to convert Unicode strings to their unaccented
+  form.
+
