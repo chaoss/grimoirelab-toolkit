@@ -40,14 +40,9 @@ class AwsManager:
             Exception: If there's a connection error.
         """
 
-        # Creates a client using the credentials found in the .aws folder
-        try:
-            logger.info("Initializing client and login in")
-            self.client = boto3.client("secretsmanager")
-
-        except (EndpointConnectionError, SSLError, ClientError, Exception) as e:
-            logger.error("Problem starting the client: %s", e)
-            raise e
+        # Creates a client using the credentials found in the .aws folder (the possible exceptions are propagated)
+        logger.info("Initializing client and login in")
+        self.client = boto3.client("secretsmanager")
 
     def _retrieve_and_format_credentials(self, service_name: str) -> dict:
         """
