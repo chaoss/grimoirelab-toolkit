@@ -28,7 +28,7 @@ from .hc_manager import HashicorpManager
 logging.basicConfig(
     level=logging.DEBUG, format="%(asctime)s - %(levelname)s - %(message)s"
 )
-_logger = logging.getLogger(__name__)
+logger = logging.getLogger(__name__)
 
 
 class SecretsManagerFactory:
@@ -50,7 +50,7 @@ class SecretsManagerFactory:
         Raises:
             ValueError: If credentials cannot be obtained
         """
-        _logger.debug("Creating new Bitwarden manager")
+        logger.debug("Creating new Bitwarden manager")
 
         if email is None:
             email = os.environ.get("GRIMOIRELAB_BW_EMAIL")
@@ -74,7 +74,7 @@ class SecretsManagerFactory:
         Returns:
             AwsManager: The singleton AwsManager instance
         """
-        _logger.debug("Creating new AWS manager")
+        logger.debug("Creating new AWS manager")
 
         return AwsManager()
 
@@ -99,7 +99,7 @@ class SecretsManagerFactory:
         Raises:
             ValueError: If required credentials cannot be obtained
         """
-        _logger.debug("Creating new Hashicorp manager")
+        logger.debug("Creating new Hashicorp manager")
 
         if vault_addr is None:
             vault_addr = os.environ.get("GRIMOIRELAB_VAULT_ADDR")

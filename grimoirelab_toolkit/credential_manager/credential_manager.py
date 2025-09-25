@@ -27,7 +27,7 @@ from .secrets_manager_factory import SecretsManagerFactory
 CREDENTIAL_MANAGER_LOG_FORMAT = "%(asctime)s - %(levelname)s - %(message)s"
 CREDENTIAL_MANAGER_DEBUG_LOG_FORMAT = "[%(asctime)s - %(name)s - %(levelname)s] - %(message)s"
 
-_logger = logging.getLogger(__name__)
+logger = logging.getLogger(__name__)
 
 
 def get_secret(
@@ -64,7 +64,7 @@ def get_secret(
             raise ValueError(f"Unsupported secrets manager: {secrets_manager_name}")
 
     except Exception as e:
-        _logger.error("Error retrieving secret: %s", e)
+        logger.error("Error retrieving secret: %s", e)
         raise
 
 
@@ -122,5 +122,5 @@ def main():
         # return secret
         print(f"Retrieved {args.credential} for {args.service}: {secret}")
     except Exception as e:
-        _logger.error("Failed to retrieve secret: %s", e)
+        logger.error("Failed to retrieve secret: %s", e)
         sys.exit(1)

@@ -24,7 +24,7 @@ import json
 import boto3
 from botocore.exceptions import EndpointConnectionError, SSLError, ClientError
 
-_logger = logging.getLogger(__name__)
+logger = logging.getLogger(__name__)
 
 
 class AwsManager:
@@ -42,11 +42,11 @@ class AwsManager:
 
         # Creates a client using the credentials found in the .aws folder
         try:
-            _logger.info("Initializing client and login in")
+            logger.info("Initializing client and login in")
             self.client = boto3.client("secretsmanager")
 
         except (EndpointConnectionError, SSLError, ClientError, Exception) as e:
-            _logger.error("Problem starting the client: %s", e)
+            logger.error("Problem starting the client: %s", e)
             raise e
 
     def _retrieve_and_format_credentials(self, service_name: str) -> dict:
@@ -63,12 +63,12 @@ class AwsManager:
             Exception: If there's a connection error.
         """
         try:
-            _logger.info("Retrieving credentials: %s", service_name)
+            logger.info("Retrieving credentials: %s", service_name)
             secret_value_response = self.client.get_secret_value(SecretId=service_name)
             formatted_credentials = json.loads(secret_value_response["SecretString"])
             return formatted_credentials
         except (ClientError, json.JSONDecodeError) as e:
-            _logger.error("Error retrieving the secret: %s", str(e))
+            logger.error("Error retrieving the secret: %s", str(e))
             raise e
 
     def get_secret(self, service_name: str, credential_name: str) -> str:
@@ -91,20 +91,20 @@ class AwsManager:
             return credential
         except KeyError:
             # This handles when the credential doesn't exist in the secret
-            _logger.error("The secret %s:%s, was not found.", service_name, credential_name)
-            _logger.error(
+            logger.error("The secret %s:%s, was not found.", service_name, credential_name)
+            logger.error(
                 "Please check the secret name and the credential name. For now here you have an empty string.")
             return ""
         except ClientError as e:
             # This handles AWS-specific errors like ResourceNotFoundException
             if e.response['Error']['Code'] == 'ResourceNotFoundException':
-                _logger.error("The secret %s:%s, was not found.", service_name, credential_name)
-                _logger.error(e)
-                _logger.error(
+                logger.error("The secret %s:%s, was not found.", service_name, credential_name)
+                logger.error(e)
+                logger.error(
                     "Please check the secret name and the credential name. For now here you have an empty string.")
                 return ""
-            _logger.error("There was a problem getting the secret")
+            logger.error("There was a problem getting the secret")
             raise e
         except Exception as e:
-            _logger.error("There was a problem getting the secret")
+            logger.error("There was a problem getting the secret")
             raise e

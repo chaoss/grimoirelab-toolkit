@@ -8,7 +8,7 @@
 # (at your option) any later version.
 #
 # This program is distributed in the hope that it will be useful,
-# but WITHOUT ANY WARRANTY; without even the implied warranty of
+# but WITHOUT ANY WARRANTY; without even the impglied warranty of
 # MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE. See the
 # GNU General Public License for more details.
 #
@@ -23,7 +23,7 @@ import logging
 import hvac
 import hvac.exceptions
 
-_logger = logging.getLogger(__name__)
+logger = logging.getLogger(__name__)
 
 
 class HashicorpManager:
@@ -45,21 +45,21 @@ class HashicorpManager:
             Exception: If couldn't inizialize the client
         """
         try:
-            _logger.debug("Creating client and logging in.")
+            logger.debug("Creating client and logging in.")
             self.client = hvac.Client(url=vault_url, token=token, verify=certificate)
 
         except Exception as e:
-            _logger.error("An error ocurred initializing the client: %s", str(e))
+            logger.error("An error ocurred initializing the client: %s", str(e))
             # this is dealt with    in the get_secret function
             raise e
 
         if self.client.sys.is_initialized():
-            _logger.debug("Client is initialized")
+            logger.debug("Client is initialized")
         else:
             raise Exception("Vault client is not initialized")
 
         if self.client.is_authenticated():
-            _logger.debug("Client is authenticated")
+            logger.debug("Client is authenticated")
         else:
             raise Exception("Client authentication failed")
 
@@ -78,11 +78,11 @@ class HashicorpManager:
             Exception: If couldn't retrieve credentials'
         """
         try:
-            _logger.info("Retrieving credentials from vault.")
+            logger.info("Retrieving credentials from vault.")
             secret = self.client.secrets.kv.read_secret(path=service_name)
             return secret
         except Exception as e:
-            _logger.error("Error retrieving the secret: %s", str(e))
+            logger.error("Error retrieving the secret: %s", str(e))
             # this is dealt with in the get_secret function
             raise e
 
@@ -104,7 +104,7 @@ class HashicorpManager:
             credentials = self._retrieve_credentials(service_name)
             # We get the exact credential from the dict returned by the retrieval
             credential = credentials["data"]["data"][credential_name]
-            _logger.info("Credentials retrieved succesfully")
+            logger.info("Credentials retrieved succesfully")
             return credential
         except (
             hvac.exceptions.Forbidden,
@@ -116,11 +116,11 @@ class HashicorpManager:
             hvac.exceptions.VaultDown,
             hvac.exceptions.VaultError,
         ) as e:
-            _logger.error("There was an error retrieving the secret: %s", e)
+            logger.error("There was an error retrieving the secret: %s", e)
             return ""
         except KeyError:
-            _logger.error("The credential %s was not found", credential_name)
+            logger.error("The credential %s was not found", credential_name)
             return ""
         except hvac.exceptions.InvalidPath:
-            _logger.error("The path %s does not exist in the vault", service_name)
+            logger.error("The path %s does not exist in the vault", service_name)
             return ""
