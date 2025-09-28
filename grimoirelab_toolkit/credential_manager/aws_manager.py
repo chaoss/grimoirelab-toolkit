@@ -1,7 +1,3 @@
-# -*- coding: utf-8 -*-
-#
-#
-#
 # This program is free software; you can redistribute it and/or modify
 # it under the terms of the GNU General Public License as published by
 # the Free Software Foundation; either version 3 of the License, or
@@ -22,13 +18,12 @@
 import logging
 import json
 import boto3
-from botocore.exceptions import EndpointConnectionError, SSLError, ClientError
+from botocore.exceptions import ClientError
 
 logger = logging.getLogger(__name__)
 
 
 class AwsManager:
-
     def __init__(self):
         """
         Initializes the client that will access to the credentials management service.
@@ -78,16 +73,14 @@ class AwsManager:
         except KeyError:
             # This handles when the credential doesn't exist in the secret
             logger.error("The secret %s:%s, was not found.", service_name, credential_name)
-            logger.error(
-                "Please check the secret name and the credential name. For now here you have an empty string.")
+            logger.error("Please check the secret name and the credential name. For now here you have an empty string.")
             return ""
         except ClientError as e:
             # This handles AWS-specific errors like ResourceNotFoundException
-            if e.response['Error']['Code'] == 'ResourceNotFoundException':
+            if e.response["Error"]["Code"] == "ResourceNotFoundException":
                 logger.error("The secret %s:%s, was not found.", service_name, credential_name)
                 logger.error(e)
-                logger.error(
-                    "Please check the secret name and the credential name. For now here you have an empty string.")
+                logger.error("Please check the secret name and the credential name. For now here you have an empty string.")
                 return ""
             logger.error("There was a problem getting the secret")
             raise e

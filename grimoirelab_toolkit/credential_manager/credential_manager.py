@@ -1,5 +1,4 @@
 #!/usr/bin/env python3
-# -*- coding: utf-8 -*-
 #
 # This program is free software; you can redistribute it and/or modify
 # it under the terms of the GNU General Public License as published by
@@ -30,9 +29,7 @@ CREDENTIAL_MANAGER_DEBUG_LOG_FORMAT = "[%(asctime)s - %(name)s - %(levelname)s] 
 logger = logging.getLogger(__name__)
 
 
-def get_secret(
-    secrets_manager_name: str, service_name: str, credential_name: str
-) -> str:
+def get_secret(secrets_manager_name: str, service_name: str, credential_name: str) -> str:
     """
     Retrieve a secret from the secrets manager.
 
@@ -74,15 +71,14 @@ def configure_logging(debug=False):
     :param debug: set the debug mode
     """
     if not debug:
-        logging.basicConfig(level=logging.INFO,
-                            format=CREDENTIAL_MANAGER_LOG_FORMAT)
-        logging.getLogger('requests').setLevel(logging.WARNING)
-        logging.getLogger('urllib3').setLevel(logging.WARNING)
-        logging.getLogger('boto3').setLevel(logging.WARNING)
-        logging.getLogger('botocore').setLevel(logging.WARNING)
+        logging.basicConfig(level=logging.INFO, format=CREDENTIAL_MANAGER_LOG_FORMAT)
+        logging.getLogger("requests").setLevel(logging.WARNING)
+        logging.getLogger("urllib3").setLevel(logging.WARNING)
+        logging.getLogger("boto3").setLevel(logging.WARNING)
+        logging.getLogger("botocore").setLevel(logging.WARNING)
     else:
-        logging.basicConfig(level=logging.DEBUG,
-                            format=CREDENTIAL_MANAGER_DEBUG_LOG_FORMAT)
+        logging.basicConfig(level=logging.DEBUG, format=CREDENTIAL_MANAGER_DEBUG_LOG_FORMAT)
+
 
 def main():
     """
@@ -92,23 +88,15 @@ def main():
     :returns: None
     :rtype: None
     """
-    parser = argparse.ArgumentParser(
-        description="Retrieve a secret from a specified secrets manager."
-    )
+    parser = argparse.ArgumentParser(description="Retrieve a secret from a specified secrets manager.")
     parser.add_argument(
         "manager",
         choices=["bitwarden", "hashicorp", "aws"],
         help="The name of the secrets manager to use.",
     )
-    parser.add_argument(
-        "service", help="The name of the service for which to retrieve the credential."
-    )
+    parser.add_argument("service", help="The name of the service for which to retrieve the credential.")
     parser.add_argument("credential", help="The name of the credential to retrieve.")
-    parser.add_argument(
-        "--debug",
-        action="store_true",
-        help="Enable debug logging"
-    )
+    parser.add_argument("--debug", action="store_true", help="Enable debug logging")
 
     args = parser.parse_args()
 

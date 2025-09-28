@@ -22,4 +22,4 @@
 from .credential_manager import get_secret
 from .secrets_manager_factory import SecretsManagerFactory
 
-__all__ = ['get_secret', 'SecretsManagerFactory']
+__all__ = ["get_secret", "SecretsManagerFactory"]

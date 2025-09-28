@@ -1,4 +1,3 @@
-# -*- coding: utf-8 -*-
 #
 #
 #
@@ -23,13 +22,12 @@ import json
 import subprocess
 import logging
 from datetime import datetime, timedelta
-
+from typing import Any
 
 logger = logging.getLogger(__name__)
 
 
 class BitwardenManager:
-
     def __init__(self, email: str, password: str):
         """
         Logs in bitwarden if not already.
@@ -55,7 +53,7 @@ class BitwardenManager:
         """
         Logs into Bitwarden and obtains a session key.
 
-        Checks the current Bitwarden session status, unlocking or logging in as necessary.
+        Checks the current Bitwarden session status, unlocking or logging in as necessary
         If successful, synchronizes the vault.
 
         :param str bw_email: Bitwarden account email.
@@ -73,9 +71,7 @@ class BitwardenManager:
 
             logger.debug("Checking Bitwarden login status")
             # bw has to be in PATH
-            status_result = subprocess.run(
-                ["bw", "status"], capture_output=True, text=True, check=False
-            )
+            status_result = subprocess.run(["bw", "status"], capture_output=True, text=True, check=False)
 
             if status_result.returncode == 0:
                 logger.debug("Checking vault status")
@@ -170,20 +166,18 @@ class BitwardenManager:
         :rtype: bool
         """
         try:
-            status_result = subprocess.run(
-                ["bw", "status"], capture_output=True, text=True, check=False
-            )
+            status_result = subprocess.run(["bw", "status"], capture_output=True, text=True, check=False)
 
             if status_result.returncode != 0:
                 return False
 
             status = json.loads(status_result.stdout)
             return (
-                status.get("status") == "unlocked"
-                and status.get("userEmail") == self._email
-                and status.get("sessionKey") == self.session_key
+                status.get("status") == "unlocked" and
+                status.get("userEmail") == self._email and
+                status.get("sessionKey") == self.session_key
             )
-        except:
+        except Exception:
             return False
 
     def _should_sync(self) -> bool:
@@ -192,10 +186,7 @@ class BitwardenManager:
         :returns: True if sync is needed, False otherwise
         :rtype: bool
         """
-        return (
-            not self.last_sync_time
-            or datetime.now() - self.last_sync_time > self.sync_interval
-        )
+        return not self.last_sync_time or (datetime.now() - self.last_sync_time > self.sync_interval)
 
     def _sync_vault(self) -> None:
         """Syncs the vault and updates last sync time.
@@ -205,9 +196,7 @@ class BitwardenManager:
         """
         try:
             logger.debug("Syncing vault")
-            subprocess.run(
-                ["bw", "sync", "--session", self.session_key], check=True
-            )
+            subprocess.run(["bw", "sync", "--session", self.session_key], check=True)
             self.last_sync_time = datetime.now()
         except subprocess.CalledProcessError as e:
             logger.error("Sync failed: %s", e)
@@ -216,7 +205,7 @@ class BitwardenManager:
         """
         Retrieves a secret from a particular service from the Bitwarden vault.
 
-        :param str service_name: The name of the data source for which to retrieve the secret.
+        :param str service_name: The name of the data source for which to retrieve the secret
         :returns: The secret item retrieved from Bitwarden as a dictionary.
         :rtype: dict
         :raises Exception: If retrieval of the secret fails.
@@ -224,14 +213,13 @@ class BitwardenManager:
         try:
             logger.info("Retrieving credential from Bitwarden CLI: %s", service_name)
 
-
             logger.debug("Session key = %s", self.session_key or "None")
-            
+
             # Check if session key is available
             if not self.session_key:
                 logger.error("No valid session key available")
                 return {}
-            
+
             # Get list of items
             list_items = subprocess.run(
                 ["bw", "list", "items", "--session", self.session_key],
@@ -240,18 +228,16 @@ class BitwardenManager:
                 check=False,
             )
 
-
             if list_items.returncode != 0:
                 logger.error(f"Failed to list items: {list_items.stderr}")
                 return {}
-
 
             items = json.loads(list_items.stdout)
 
             # Find exact match
             match_item = None
             for item in items:
-                if item.get("name","").lower() == service_name.lower():
+                if item.get("name", "").lower() == service_name.lower():
                     match_item = item
                     break
 
@@ -268,8 +254,6 @@ class BitwardenManager:
                 text=True,
                 check=False,
             )
-
-
 
             if result.returncode != 0:
                 logger.error("Failed to retrieve secret: %s", result.stderr)
@@ -306,7 +290,7 @@ class BitwardenManager:
 
         return formatted
 
-    def get_secret(self, service_name: str, credential_name: str) -> str:
+    def get_secret(self, service_name: str, credential_name: str) -> Any | None:
         """
         Retrieves a secret by name from the Bitwarden vault.
 
@@ -317,21 +301,14 @@ class BitwardenManager:
         """
 
         # If stored credentials are not available or belong to a different service
-        if (
-            not self.formatted_credentials
-            or self.formatted_credentials.get("service_name") != service_name
-        ):
+        if not self.formatted_credentials or self.formatted_credentials.get("service_name") != service_name:
             unformatted_credentials = self._retrieve_credentials(service_name)
-            self.formatted_credentials = self._format_credentials(
-                unformatted_credentials
-            )
+            self.formatted_credentials = self._format_credentials(unformatted_credentials)
 
         secret = self.formatted_credentials.get(credential_name)
         # in case nothing was found
         if not secret:
-            logger.error(
-                "The credential %s:%s, was not found.", service_name, credential_name
-            )
+            logger.error("The credential %s:%s, was not found.", service_name, credential_name)
             logger.error("In the meantime here you got an empty string")
             return None
         else:

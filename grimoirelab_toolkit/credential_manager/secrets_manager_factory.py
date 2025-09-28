@@ -1,4 +1,3 @@
-# -*- coding: utf-8 -*-
 #
 # This program is free software; you can redistribute it and/or modify
 # it under the terms of the GNU General Public License as published by
@@ -25,14 +24,11 @@ from .aws_manager import AwsManager
 from .bw_manager import BitwardenManager
 from .hc_manager import HashicorpManager
 
-logging.basicConfig(
-    level=logging.DEBUG, format="%(asctime)s - %(levelname)s - %(message)s"
-)
+logging.basicConfig(level=logging.DEBUG, format="%(asctime)s - %(levelname)s - %(message)s")
 logger = logging.getLogger(__name__)
 
 
 class SecretsManagerFactory:
-
     @staticmethod
     def get_bitwarden_manager(email=None, password=None):
         """
@@ -76,11 +72,8 @@ class SecretsManagerFactory:
 
         return AwsManager()
 
-
     @staticmethod
-    def get_hashicorp_manager(
-        vault_addr=None, token=None, certificate=None
-    ):
+    def get_hashicorp_manager(vault_addr=None, token=None, certificate=None):
         """
         Gets or creates a HashicorpManager instance.
 
@@ -108,9 +101,7 @@ class SecretsManagerFactory:
         if not token:
             token = input("Please enter vault token: ")
         if not certificate:
-            certificate = input(
-                "Please enter path to a PEM-encoded CA certificate file: "
-            )
+            certificate = input("Please enter path to a PEM-encoded CA certificate file: ")
 
         if not all([vault_addr, token, certificate]):
             raise ValueError("All Hashicorp Vault credentials are required")

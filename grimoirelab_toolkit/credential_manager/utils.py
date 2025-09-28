@@ -1,5 +1,6 @@
 from urllib.parse import urlparse, urlunparse
 
+
 def build_url(base_url, username, password=None, token=None):
     """Build URL with credentials, preserving the original path and query.
     Used to build the URLs for kibiter and elasticsearch if secrets manager is active in the config.
