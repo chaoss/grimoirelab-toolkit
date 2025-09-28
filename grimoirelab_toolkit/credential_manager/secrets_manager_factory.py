@@ -38,17 +38,15 @@ class SecretsManagerFactory:
         """
         Gets or creates a BitwardenManager instance.
 
-        Args:
-            email (str, optional): Bitwarden email. If not provided,
-                                  will try environment variables or prompt.
-            password (str, optional): Bitwarden password. If not provided,
-                                     will try environment variables or prompt.
-
-        Returns:
-            BitwardenManager: The singleton BitwardenManager instance
-
-        Raises:
-            ValueError: If credentials cannot be obtained
+        :param email: Bitwarden email. If not provided,
+                      will try environment variables or prompt.
+        :type email: str, optional
+        :param password: Bitwarden password. If not provided,
+                         will try environment variables or prompt.
+        :type password: str, optional
+        :returns: The singleton BitwardenManager instance
+        :rtype: BitwardenManager
+        :raises ValueError: If credentials cannot be obtained
         """
         logger.debug("Creating new Bitwarden manager")
 
@@ -71,8 +69,8 @@ class SecretsManagerFactory:
         """
         Gets or creates an AwsManager instance.
 
-        Returns:
-            AwsManager: The singleton AwsManager instance
+        :returns: The singleton AwsManager instance
+        :rtype: AwsManager
         """
         logger.debug("Creating new AWS manager")
 
@@ -86,18 +84,15 @@ class SecretsManagerFactory:
         """
         Gets or creates a HashicorpManager instance.
 
-        Args:
-            vault_addr (str, optional): Vault address.
-
-            token (str, optional): Vault token.
-
-            certificate (str, optional): Path to CA certificate.
-
-        Returns:
-            HashicorpManager: The singleton HashicorpManager instance
-
-        Raises:
-            ValueError: If required credentials cannot be obtained
+        :param vault_addr: Vault address.
+        :type vault_addr: str, optional
+        :param token: Vault token.
+        :type token: str, optional
+        :param certificate: Path to CA certificate.
+        :type certificate: str, optional
+        :returns: The singleton HashicorpManager instance
+        :rtype: HashicorpManager
+        :raises ValueError: If required credentials cannot be obtained
         """
         logger.debug("Creating new Hashicorp manager")
 

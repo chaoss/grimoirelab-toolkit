@@ -34,12 +34,9 @@ class BitwardenManager:
         """
         Logs in bitwarden if not already.
 
-        Args:
-            email (str): The email of the user
-            password (str): The password of the user
-
-        Raises:
-            FileNotFoundError: If no credentials file is found
+        :param str email: The email of the user
+        :param str password: The password of the user
+        :raises FileNotFoundError: If no credentials file is found
         """
         # Session key of the bw session
         self.session_key = None
@@ -61,15 +58,11 @@ class BitwardenManager:
         Checks the current Bitwarden session status, unlocking or logging in as necessary.
         If successful, synchronizes the vault.
 
-        Args:
-            bw_email (str): Bitwarden account email.
-            bw_password (str): Bitwarden account password.
-
-        Returns:
-            str: The session key for the current Bitwarden session.
-
-        Raises:
-            Exception: If unlocking or logging into Bitwarden fails.
+        :param str bw_email: Bitwarden account email.
+        :param str bw_password: Bitwarden account password.
+        :returns: The session key for the current Bitwarden session.
+        :rtype: str
+        :raises Exception: If unlocking or logging into Bitwarden fails.
         """
         try:
             # If we have a session key, check if sync is needed
@@ -171,7 +164,11 @@ class BitwardenManager:
             raise e
 
     def _validate_session(self) -> bool:
-        """Checks current session."""
+        """Checks current session.
+
+        :returns: True if session is valid, False otherwise
+        :rtype: bool
+        """
         try:
             status_result = subprocess.run(
                 ["bw", "status"], capture_output=True, text=True, check=False
@@ -190,14 +187,22 @@ class BitwardenManager:
             return False
 
     def _should_sync(self) -> bool:
-        """Determines if vault sync is needed based on last sync time."""
+        """Determines if vault sync is needed based on last sync time.
+
+        :returns: True if sync is needed, False otherwise
+        :rtype: bool
+        """
         return (
             not self.last_sync_time
             or datetime.now() - self.last_sync_time > self.sync_interval
         )
 
     def _sync_vault(self) -> None:
-        """Syncs the vault and updates last sync time."""
+        """Syncs the vault and updates last sync time.
+
+        :returns: None
+        :rtype: None
+        """
         try:
             logger.debug("Syncing vault")
             subprocess.run(
@@ -211,14 +216,10 @@ class BitwardenManager:
         """
         Retrieves a secret from a particular service from the Bitwarden vault.
 
-        Args:
-            service_name (str): The name of the data source for which to retrieve the secret.
-
-        Returns:
-            dict: The secret item retrieved from Bitwarden as a dictionary.
-
-        Raises:
-            Exception: If retrieval of the secret fails.
+        :param str service_name: The name of the data source for which to retrieve the secret.
+        :returns: The secret item retrieved from Bitwarden as a dictionary.
+        :rtype: dict
+        :raises Exception: If retrieval of the secret fails.
         """
         try:
             logger.info("Retrieving credential from Bitwarden CLI: %s", service_name)
@@ -286,11 +287,9 @@ class BitwardenManager:
         """
         Formats the credentials retrieved from Bitwarden into a standardized format.
 
-        Args:
-            credentials (dict): Raw credentials from Bitwarden
-
-        Returns:
-            dict: Formatted credentials with standardized keys
+        :param dict credentials: Raw credentials from Bitwarden
+        :returns: Formatted credentials with standardized keys
+        :rtype: dict
         """
         formatted = {"service_name": credentials["name"].lower()}
 
@@ -311,12 +310,10 @@ class BitwardenManager:
         """
         Retrieves a secret by name from the Bitwarden vault.
 
-        Args:
-            service_name (str): The name of the secret to retrieve.
-            credential_name (str): The concrete credential to retrieve.
-
-        Returns:
-            str: The secret value retrieved.
+        :param str service_name: The name of the secret to retrieve.
+        :param str credential_name: The concrete credential to retrieve.
+        :returns: The secret value retrieved.
+        :rtype: str
         """
 
         # If stored credentials are not available or belong to a different service

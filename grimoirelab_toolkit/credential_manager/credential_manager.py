@@ -36,16 +36,12 @@ def get_secret(
     """
     Retrieve a secret from the secrets manager.
 
-    Args:
-        secrets_manager_name (str): The name of the secrets manager to be used
-        service_name (str): The name of the service we want to access
-        credential_name (str): The name of the credential we want to retrieve
-
-    Returns:
-        str: The credential retrieved
-
-    Raises:
-        ValueError: If the secrets manager is not supported or initialization fails
+    :param str secrets_manager_name: The name of the secrets manager to be used
+    :param str service_name: The name of the service we want to access
+    :param str credential_name: The name of the credential we want to retrieve
+    :returns: The credential retrieved
+    :rtype: str
+    :raises ValueError: If the secrets manager is not supported or initialization fails
     """
     try:
         if secrets_manager_name == "bitwarden":
@@ -92,6 +88,9 @@ def main():
     """
     Main entry point for the command line interface.
     Parses arguments and retrieves secrets using the appropriate manager.
+
+    :returns: None
+    :rtype: None
     """
     parser = argparse.ArgumentParser(
         description="Retrieve a secret from a specified secrets manager."

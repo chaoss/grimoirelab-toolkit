@@ -36,13 +36,10 @@ class HashicorpManager:
         Initializes the client with the corresponding token to interact with the vault, so no login
         is required in vault.
 
-        Args:
-            vault_url (str): The vault URL.
-            token (str): The access token.
-            certificate (str): The tls certificate.
-
-        Raises:
-            Exception: If couldn't inizialize the client
+        :param str vault_url: The vault URL.
+        :param str token: The access token.
+        :param str certificate: The tls certificate.
+        :raises Exception: If couldn't inizialize the client
         """
         try:
             logger.debug("Creating client and logging in.")
@@ -67,15 +64,11 @@ class HashicorpManager:
         """
         Function responsible for retrieving credentials from vault
 
-        Args:
-            service_name (str): The name of the service to retrieve credentials for
-
-        Returns:
-            a dict containing all the data for that service. Includes metadata
+        :param str service_name: The name of the service to retrieve credentials for
+        :returns: a dict containing all the data for that service. Includes metadata
             and other information stored in the vault
-
-        Raises:
-            Exception: If couldn't retrieve credentials'
+        :rtype: dict
+        :raises Exception: If couldn't retrieve credentials'
         """
         try:
             logger.info("Retrieving credentials from vault.")
@@ -90,15 +83,11 @@ class HashicorpManager:
         """
         Retrieves the value of the service + credential named.
 
-        Args:
-            service_name (str): The name of the service to retrieve credentials for
-            credential_name (str): The name of the credential to retrieve
-
-        Returns:
-            str: The value of the credential
-
-        Raises:
-            Exception: If couldn't retrieve credentials'
+        :param str service_name: The name of the service to retrieve credentials for
+        :param str credential_name: The name of the credential to retrieve
+        :returns: The value of the credential
+        :rtype: str
+        :raises Exception: If couldn't retrieve credentials'
         """
         try:
             credentials = self._retrieve_credentials(service_name)

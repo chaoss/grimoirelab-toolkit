@@ -36,7 +36,7 @@ def mock_hvac_client():
 
 
 def test_initialization(mock_hvac_client):
-    """Test successful initialization of HashicorpManager."""
+    """Test successful initialization of HashicorpManager"""
 
     manager = HashicorpManager("http://vault-url", "test-token", "test-certificate")
 
@@ -49,7 +49,7 @@ def test_initialization(mock_hvac_client):
 
 
 def test_initialization_failure(mock_hvac_client):
-    """Test handling of initialization failures."""
+    """Test handling of initialization failures"""
 
     mock_hvac_client.side_effect = hvac.exceptions.VaultError("Connection failed")
 
@@ -59,7 +59,7 @@ def test_initialization_failure(mock_hvac_client):
 
 
 def test_get_secret_success(mock_hvac_client):
-    """Test successful secret retrieval."""
+    """Test successful secret retrieval"""
 
     # Mock that returns the test secret
     mock_instance = mock_hvac_client.return_value
@@ -73,7 +73,7 @@ def test_get_secret_success(mock_hvac_client):
 
 
 def test_get_secret_not_found(mock_hvac_client):
-    """Test handling of non existant secrets."""
+    """Test handling of non existant secrets"""
 
     # Mock that simulates non existant secret
     mock_instance = mock_hvac_client.return_value
@@ -86,7 +86,7 @@ def test_get_secret_not_found(mock_hvac_client):
 
 
 def test_get_secret_permission_denied(mock_hvac_client):
-    """Test handling of permission denied errors."""
+    """Test handling of permission denied errors"""
 
     # Mock to simulate permission denied
     mock_instance = mock_hvac_client.return_value
@@ -99,7 +99,7 @@ def test_get_secret_permission_denied(mock_hvac_client):
 
 
 def test_retrieve_credentials_success(mock_hvac_client):
-    """Test successful retrieval of raw credentials."""
+    """Test successful retrieval of raw credentials"""
 
     # Mock that returns the test secret
     mock_instance = mock_hvac_client.return_value
@@ -113,7 +113,7 @@ def test_retrieve_credentials_success(mock_hvac_client):
 
 
 def test_retrieve_credentials_failure(mock_hvac_client):
-    """Test handling of credential retrieval failures."""
+    """Test handling of credential retrieval failures"""
 
     # Mock simulate Vault error
     mock_instance = mock_hvac_client.return_value
@@ -128,7 +128,7 @@ def test_retrieve_credentials_failure(mock_hvac_client):
 
 
 def test_vault_connection_error(mock_hvac_client):
-    """Test handling of Vault connection errors."""
+    """Test handling of Vault connection errors"""
 
     # Mock that simulates connection error
     mock_instance = mock_hvac_client.return_value

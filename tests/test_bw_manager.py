@@ -8,7 +8,11 @@ from grimoirelab_toolkit.credential_manager.bw_manager import BitwardenManager
 
 
 class TestBitwardenManager(unittest.TestCase):
-    """BitwardenManager unit tests"""
+    """BitwardenManager unit tests.
+
+    Tests the BitwardenManager class which handles interaction with Bitwarden CLI
+    for credential management.
+    """
 
     def setUp(self):
         self.email = "test@example.com"
@@ -16,7 +20,11 @@ class TestBitwardenManager(unittest.TestCase):
         self.manager = BitwardenManager(self.email, self.password)
 
     def tearDown(self):
-        """Clean up after each test"""
+        """Clean up after each test
+
+        :return: None
+        :rtype: None
+        """
         self.manager = None
 
     def test_initialization(self):
