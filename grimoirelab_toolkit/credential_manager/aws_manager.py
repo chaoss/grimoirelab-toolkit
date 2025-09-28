@@ -62,8 +62,10 @@ class AwsManager:
 
         :param str service_name: Name of the service to retrieve credentials for
         :param str credential_name: Name of the credential
-        :returns: The credential value if found, empty string if not found
+        :returns: The credential value if found
         :rtype: str
+        :raises KeyError: If the credential name is not found in the secret
+        :raises ClientError: If there's an AWS-specific error like ResourceNotFoundException
         :raises Exception: If there's a connection error.
         """
         try:
@@ -74,14 +76,14 @@ class AwsManager:
             # This handles when the credential doesn't exist in the secret
             logger.error("The secret %s:%s, was not found.", service_name, credential_name)
             logger.error("Please check the secret name and the credential name. For now here you have an empty string.")
-            return ""
+            raise KeyError
         except ClientError as e:
             # This handles AWS-specific errors like ResourceNotFoundException
             if e.response["Error"]["Code"] == "ResourceNotFoundException":
                 logger.error("The secret %s:%s, was not found.", service_name, credential_name)
                 logger.error(e)
                 logger.error("Please check the secret name and the credential name. For now here you have an empty string.")
-                return ""
+                raise e
             logger.error("There was a problem getting the secret")
             raise e
         except Exception as e:
