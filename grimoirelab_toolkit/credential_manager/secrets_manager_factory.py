@@ -18,7 +18,7 @@
 
 import logging
 
-from . import HashicorpVaultError, BitwardenCLIError
+from .exceptions import HashicorpVaultError, BitwardenCLIError
 from .aws_manager import AwsManager
 from .bw_manager import BitwardenManager
 from .hc_manager import HashicorpManager
