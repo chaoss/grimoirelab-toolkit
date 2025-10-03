@@ -1,4 +1,3 @@
-# -*- coding: utf-8 -*-
 #
 #
 #
@@ -23,6 +22,8 @@ import logging
 import hvac
 import hvac.exceptions
 
+from .exceptions import HashicorpVaultError, SecretNotFoundError, CredentialNotFoundError, AuthenticationError, ConnectionError
+
 logger = logging.getLogger(__name__)
 
 
@@ -39,26 +40,27 @@ class HashicorpManager:
         :param str vault_url: The vault URL.
         :param str token: The access token.
         :param str certificate: The tls certificate.
-        :raises Exception: If couldn't inizialize the client
+        :raises AuthenticationError: If client authentication fails
+        :raises CredentialConnectionError: If connection issues occur
+        :raises HashicorpVaultError: If Vault operations fail
         """
         try:
             logger.debug("Creating client and logging in.")
             self.client = hvac.Client(url=vault_url, token=token, verify=certificate)
 
         except Exception as e:
-            logger.error("An error ocurred initializing the client: %s", str(e))
-            # this is dealt with    in the get_secret function
-            raise e
+            logger.error("An error occurred initializing the client: %s", str(e))
+            raise ConnectionError(f"Failed to initialize Vault client: {e}")
 
         if self.client.sys.is_initialized():
             logger.debug("Client is initialized")
         else:
-            raise Exception("Vault client is not initialized")
+            raise HashicorpVaultError("Vault client is not initialized")
 
         if self.client.is_authenticated():
             logger.debug("Client is authenticated")
         else:
-            raise Exception("Client authentication failed")
+            raise AuthenticationError("Client authentication failed")
 
     def _retrieve_credentials(self, service_name: str) -> dict:
         """
@@ -68,16 +70,19 @@ class HashicorpManager:
         :returns: a dict containing all the data for that service. Includes metadata
             and other information stored in the vault
         :rtype: dict
-        :raises Exception: If couldn't retrieve credentials'
+        :raises SecretNotFoundError: If the secret path is not found
+        :raises HashicorpVaultError: If Vault operations fail
         """
         try:
             logger.info("Retrieving credentials from vault.")
             secret = self.client.secrets.kv.read_secret(path=service_name)
             return secret
+        except hvac.exceptions.InvalidPath:
+            logger.error("The path %s does not exist in the vault", service_name)
+            raise SecretNotFoundError(f"Secret path '{service_name}' not found in Vault")
         except Exception as e:
             logger.error("Error retrieving the secret: %s", str(e))
-            # this is dealt with in the get_secret function
-            raise e
+            raise HashicorpVaultError(f"Vault operation failed: {e}")
 
     def get_secret(self, service_name: str, credential_name: str) -> str:
         """
@@ -87,14 +92,19 @@ class HashicorpManager:
         :param str credential_name: The name of the credential to retrieve
         :returns: The value of the credential
         :rtype: str
-        :raises Exception: If couldn't retrieve credentials'
+        :raises CredentialNotFoundError: If the credential name is not found
+        :raises SecretNotFoundError: If the secret path is not found
+        :raises HashicorpVaultError: If Vault operations fail
         """
         try:
             credentials = self._retrieve_credentials(service_name)
             # We get the exact credential from the dict returned by the retrieval
             credential = credentials["data"]["data"][credential_name]
-            logger.info("Credentials retrieved succesfully")
+            logger.info("Credentials retrieved successfully")
             return credential
+        except KeyError:
+            logger.error("The credential %s was not found", credential_name)
+            raise CredentialNotFoundError(f"Credential '{credential_name}' not found in secret '{service_name}'")
         except (
             hvac.exceptions.Forbidden,
             hvac.exceptions.InternalServerError,
@@ -106,10 +116,4 @@ class HashicorpManager:
             hvac.exceptions.VaultError,
         ) as e:
             logger.error("There was an error retrieving the secret: %s", e)
-            return ""
-        except KeyError:
-            logger.error("The credential %s was not found", credential_name)
-            return ""
-        except hvac.exceptions.InvalidPath:
-            logger.error("The path %s does not exist in the vault", service_name)
-            return ""
+            raise HashicorpVaultError(f"Vault operation failed: {e}")
