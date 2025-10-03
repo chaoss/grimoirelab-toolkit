@@ -313,7 +313,7 @@ class BitwardenManager:
 
         # If stored credentials are not available or belong to a different service
         if not self.formatted_credentials or self.formatted_credentials.get("service_name") != service_name:
-            unformatted_credentials = self._iretrieve_credentials(service_name)
+            unformatted_credentials = self._retrieve_credentials(service_name)
             self.formatted_credentials = self._format_credentials(unformatted_credentials)
 
         secret = self.formatted_credentials.get(credential_name)
