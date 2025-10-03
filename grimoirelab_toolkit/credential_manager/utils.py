@@ -5,10 +5,10 @@ def build_url(base_url, username, password=None, token=None):
     """Build URL with credentials, preserving the original path and query.
     Used to build the URLs for kibiter and elasticsearch if secrets manager is active in the config.
 
-    :param base_url: Original URL from config
-    :param username: Username
-    :param password: Password
-    :param token: Token api token, access token
+    :param str base_url: Original URL from config
+    :param str username: Username
+    :param str password: Password
+    :param str token: Token api token, access token
     :returns: The url formatted with the corresponding credentials if provided
     :rtype: str
     """
