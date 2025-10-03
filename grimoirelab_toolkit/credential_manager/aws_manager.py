@@ -20,6 +20,8 @@ import json
 import boto3
 from botocore.exceptions import ClientError
 
+from .exceptions import AWSSecretsManagerError, SecretNotFoundError, CredentialNotFoundError, InvalidSecretFormatError
+
 logger = logging.getLogger(__name__)
 
 
@@ -31,7 +33,8 @@ class AwsManager:
         This takes the credentials to log into aws from the .aws folder.
         This constructor also takes other relevant information from that folder if it exists.
 
-        :raises Exception: If there's a connection error.
+        :raises AWSSecretsManagerError: If AWS Secrets Manager operations fail
+        :raises CredentialConnectionError: If connection issues occur
         """
 
         # Creates a client using the credentials found in the .aws folder (the possible exceptions are propagated)
@@ -45,16 +48,22 @@ class AwsManager:
         :param str service_name: Name of the service to retrieve credentials for (or name of the secret)
         :returns: Dictionary containing the credentials retrieved and formatted as a dict
         :rtype: dict
-        :raises Exception: If there's a connection error.
+        :raises AWSSecretsManagerError: If AWS Secrets Manager operations fail
+        :raises CredentialConnectionError: If connection issues occur
         """
         try:
             logger.info("Retrieving credentials: %s", service_name)
             secret_value_response = self.client.get_secret_value(SecretId=service_name)
             formatted_credentials = json.loads(secret_value_response["SecretString"])
             return formatted_credentials
-        except (ClientError, json.JSONDecodeError) as e:
+        except ClientError as e:
             logger.error("Error retrieving the secret: %s", str(e))
-            raise e
+            if e.response["Error"]["Code"] == "ResourceNotFoundException":
+                raise SecretNotFoundError(f"Secret '{service_name}' not found in AWS Secrets Manager")
+            raise AWSSecretsManagerError(f"AWS Secrets Manager error: {e}")
+        except json.JSONDecodeError as e:
+            logger.error("Error parsing secret JSON: %s", str(e))
+            raise InvalidSecretFormatError(f"Invalid secret format: {e}")
 
     def get_secret(self, service_name: str, credential_name: str) -> str:
         """
@@ -64,9 +73,10 @@ class AwsManager:
         :param str credential_name: Name of the credential
         :returns: The credential value if found
         :rtype: str
-        :raises KeyError: If the credential name is not found in the secret
-        :raises ClientError: If there's an AWS-specific error like ResourceNotFoundException
-        :raises Exception: If there's a connection error.
+        :raises CredentialNotFoundError: If the credential name is not found in the secret
+        :raises SecretNotFoundError: If the secret is not found
+        :raises AWSSecretsManagerError: If AWS Secrets Manager operations fail
+        :raises InvalidSecretFormatError: If secret data is malformed
         """
         try:
             formatted_credentials = self._retrieve_and_format_credentials(service_name)
@@ -74,18 +84,5 @@ class AwsManager:
             return credential
         except KeyError:
             # This handles when the credential doesn't exist in the secret
-            logger.error("The secret %s:%s, was not found.", service_name, credential_name)
-            logger.error("Please check the secret name and the credential name. For now here you have an empty string.")
-            raise KeyError
-        except ClientError as e:
-            # This handles AWS-specific errors like ResourceNotFoundException
-            if e.response["Error"]["Code"] == "ResourceNotFoundException":
-                logger.error("The secret %s:%s, was not found.", service_name, credential_name)
-                logger.error(e)
-                logger.error("Please check the secret name and the credential name. For now here you have an empty string.")
-                raise e
-            logger.error("There was a problem getting the secret")
-            raise e
-        except Exception as e:
-            logger.error("There was a problem getting the secret")
-            raise e
+            logger.error("The credential '%s' was not found in secret '%s'", credential_name, service_name)
+            raise CredentialNotFoundError(f"Credential '{credential_name}' not found in secret '{service_name}'")
