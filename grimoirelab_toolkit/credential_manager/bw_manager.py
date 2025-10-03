@@ -24,6 +24,15 @@ import logging
 from datetime import datetime, timedelta
 from typing import Any
 
+from .exceptions import (
+    BitwardenCLIError,
+    InvalidCredentialsError,
+    SessionNotFoundError,
+    SecretNotFoundError,
+    CredentialNotFoundError,
+    ConnectionError,
+)
+
 logger = logging.getLogger(__name__)
 
 
@@ -34,7 +43,9 @@ class BitwardenManager:
 
         :param str email: The email of the user
         :param str password: The password of the user
-        :raises FileNotFoundError: If no credentials file is found
+        :raises InvalidCredentialsError: If invalid credentials are provided
+        :raises BitwardenCLIError: If Bitwarden CLI operations fail
+        :raises CredentialConnectionError: If connection issues occur
         """
         # Session key of the bw session
         self.session_key = None
@@ -46,8 +57,9 @@ class BitwardenManager:
 
         try:
             self._login(email, password)
-        except FileNotFoundError:
-            logger.error("File not found")
+        except (InvalidCredentialsError, BitwardenCLIError, ConnectionError) as e:
+            logger.error("Failed to initialize Bitwarden manager: %s", e)
+            raise
 
     def _login(self, bw_email: str, bw_password: str) -> str | None:
         """
@@ -60,7 +72,10 @@ class BitwardenManager:
         :param str bw_password: Bitwarden account password.
         :returns: The session key for the current Bitwarden session.
         :rtype: str
-        :raises Exception: If unlocking or logging into Bitwarden fails.
+        :raises InvalidCredentialsError: If invalid credentials are provided
+        :raises SessionNotFoundError: If session cannot be established
+        :raises BitwardenCLIError: If Bitwarden CLI operations fail
+        :raises CredentialConnectionError: If connection issues occur
         """
         try:
             # If we have a session key, check if sync is needed
@@ -103,13 +118,11 @@ class BitwardenManager:
 
                         session_key = unlock_result.stdout.strip() if unlock_result.stdout else ""
                         if not session_key:
-                            logger.error("Empty session key received from unlock command")
-                            return
+                            raise BitwardenCLIError("Empty session key received from unlock command")
                         self.session_key = session_key
 
                     if not self.session_key:
-                        logger.debug("Couldn't obtain session key during login")
-                        return None
+                        raise SessionNotFoundError("Couldn't obtain session key during login")
 
                 else:
                     logger.debug("Login in: %s", bw_email)
@@ -125,14 +138,13 @@ class BitwardenManager:
                         logger.error("Error logging in: %s", error_msg)
                         # Handle specific authentication errors
                         if "invalid_grant" in error_msg.lower():
-                            logger.error("Invalid credentials provided for Bitwarden")
-                        return None
+                            raise InvalidCredentialsError("Invalid credentials provided for Bitwarden")
+                        raise BitwardenCLIError(f"Bitwarden CLI unlock failed: {error_msg}")
 
                     logger.debug("Setting session key")
                     session_key = result.stdout.strip() if result.stdout else ""
                     if not session_key:
-                        logger.error("Empty session key received from login command")
-                        return None
+                        raise BitwardenCLIError("Empty session key received from login command")
                     self.session_key = session_key
 
             if self.session_key:
@@ -152,12 +164,12 @@ class BitwardenManager:
                         logger.debug("Sync failed but continuing: %s", error_msg)
                 return self.session_key
 
-            logger.debug("Session key not found cause could not log in")
-            return None
+            if not self.session_key:
+                raise SessionNotFoundError("Session key not found - could not log in")
+            return self.session_key
 
-        except Exception as e:
-            logger.error("There was a problem login in: %s", e)
-            raise e
+        except (subprocess.CalledProcessError, json.JSONDecodeError) as e:
+            raise ConnectionError(f"Bitwarden CLI command failed: {e}")
 
     def _validate_session(self) -> bool:
         """Checks current session.
@@ -173,9 +185,9 @@ class BitwardenManager:
 
             status = json.loads(status_result.stdout)
             return (
-                status.get("status") == "unlocked" and
-                status.get("userEmail") == self._email and
-                status.get("sessionKey") == self.session_key
+                status.get("status") == "unlocked"
+                and status.get("userEmail") == self._email
+                and status.get("sessionKey") == self.session_key
             )
         except Exception:
             return False
@@ -208,7 +220,9 @@ class BitwardenManager:
         :param str service_name: The name of the data source for which to retrieve the secret
         :returns: The secret item retrieved from Bitwarden as a dictionary.
         :rtype: dict
-        :raises Exception: If retrieval of the secret fails.
+        :raises BitwardenCLIError: If Bitwarden CLI operations fail
+        :raises CredentialConnectionError: If connection issues occur
+        :raises InvalidSecretFormatError: If secret data is malformed
         """
         try:
             logger.info("Retrieving credential from Bitwarden CLI: %s", service_name)
@@ -217,8 +231,7 @@ class BitwardenManager:
 
             # Check if session key is available
             if not self.session_key:
-                logger.error("No valid session key available")
-                return {}
+                raise SessionNotFoundError("No valid session key available")
 
             # Get list of items
             list_items = subprocess.run(
@@ -229,8 +242,8 @@ class BitwardenManager:
             )
 
             if list_items.returncode != 0:
-                logger.error(f"Failed to list items: {list_items.stderr}")
-                return {}
+                error_msg = list_items.stderr.strip() if list_items.stderr else "Unknown error"
+                raise BitwardenCLIError(f"Failed to list items: {error_msg}")
 
             items = json.loads(list_items.stdout)
 
@@ -242,9 +255,7 @@ class BitwardenManager:
                     break
 
             if not match_item:
-                if not match_item:
-                    logger.error(f"No exact match found for item: {service_name}")
-                    return {}
+                raise SecretNotFoundError(f"No exact match found for item: {service_name}")
 
             # Retrieve exact match by id
             item_id = match_item.get("id")
@@ -256,16 +267,15 @@ class BitwardenManager:
             )
 
             if result.returncode != 0:
-                logger.error("Failed to retrieve secret: %s", result.stderr)
-                return {}
+                error_msg = result.stderr.strip() if result.stderr else "Unknown error"
+                raise BitwardenCLIError(f"Failed to retrieve secret: {error_msg}")
 
             retrieved_secrets = json.loads(result.stdout)
             logger.info("Secrets successfully retrieved")
             return retrieved_secrets
 
-        except Exception as e:
-            logger.error("There was a problem retrieving secret: %s", e)
-            raise e
+        except (subprocess.CalledProcessError, json.JSONDecodeError) as e:
+            raise ConnectionError(f"Bitwarden CLI operation failed: {e}")
 
     def _format_credentials(self, credentials: dict) -> dict:
         """
@@ -296,21 +306,18 @@ class BitwardenManager:
 
         :param str service_name: The name of the secret to retrieve.
         :param str credential_name: The concrete credential to retrieve.
-        :returns: The secret value retrieved.
-        :rtype: str
+        :raises CredentialNotFoundError: If the specific credential is not found
+        :raises BitwardenCLIError: If Bitwarden CLI operations fail
+        :raises CredentialConnectionError: If connection issues occur
         """
 
         # If stored credentials are not available or belong to a different service
         if not self.formatted_credentials or self.formatted_credentials.get("service_name") != service_name:
-            unformatted_credentials = self._retrieve_credentials(service_name)
+            unformatted_credentials = self._iretrieve_credentials(service_name)
             self.formatted_credentials = self._format_credentials(unformatted_credentials)
 
         secret = self.formatted_credentials.get(credential_name)
-        # in case nothing was found
         if not secret:
-            logger.error("The credential %s:%s, was not found.", service_name, credential_name)
-            logger.error("In the meantime here you got an empty string")
-            return None
-        else:
-            # Return the requested credential
-            return secret
+            raise CredentialNotFoundError(f"Credential '{credential_name}' not found in service '{service_name}'")
+
+        return secret
