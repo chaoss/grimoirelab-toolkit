@@ -18,7 +18,9 @@
 #
 
 import argparse
+import getpass
 import logging
+import os
 import sys
 
 from .secrets_manager_factory import SecretsManagerFactory
@@ -42,11 +44,34 @@ def get_secret(secrets_manager_name: str, service_name: str, credential_name: st
     """
     try:
         if secrets_manager_name == "bitwarden":
-            manager = SecretsManagerFactory.get_bitwarden_manager()
+            # Get credentials from environment or prompt user
+            email = os.environ.get("GRIMOIRELAB_BW_EMAIL")
+            password = os.environ.get("GRIMOIRELAB_BW_PASSWORD")
+
+            if not email or not password:
+                if not email:
+                    email = input("Bitwarden email: ")
+                if not password:
+                    password = getpass.getpass("Bitwarden master password: ")
+
+            manager = SecretsManagerFactory.get_bitwarden_manager(email, password)
             return manager.get_secret(service_name, credential_name)
 
         elif secrets_manager_name == "hashicorp":
-            manager = SecretsManagerFactory.get_hashicorp_manager()
+            # Get credentials from environment or prompt user
+            vault_addr = os.environ.get("GRIMOIRELAB_VAULT_ADDR")
+            token = os.environ.get("GRIMOIRELAB_VAULT_TOKEN")
+            certificate = os.environ.get("GRIMOIRELAB_VAULT_CACERT")
+
+            if not vault_addr or not token or not certificate:
+                if not vault_addr:
+                    vault_addr = input("Please enter vault address: ")
+                if not token:
+                    token = input("Please enter vault token: ")
+                if not certificate:
+                    certificate = input("Please enter path to a PEM-encoded CA certificate file: ")
+
+            manager = SecretsManagerFactory.get_hashicorp_manager(vault_addr, token, certificate)
             return manager.get_secret(service_name, credential_name)
 
         elif secrets_manager_name == "aws":
@@ -68,7 +93,7 @@ def configure_logging(debug=False):
     By default, log messages are sent to stderr. Set the parameter
     `debug` to activate the debug mode.
 
-    :param debug: set the debug mode
+    :param bool debug: set the debug mode
     """
     if not debug:
         logging.basicConfig(level=logging.INFO, format=CREDENTIAL_MANAGER_LOG_FORMAT)
@@ -106,8 +131,7 @@ def main():
 
     try:
         secret = get_secret(args.manager, args.service, args.credential)
-        # return secret
-        print(f"Retrieved {args.credential} for {args.service}: {secret}")
+        return secret
     except Exception as e:
         logger.error("Failed to retrieve secret: %s", e)
         sys.exit(1)

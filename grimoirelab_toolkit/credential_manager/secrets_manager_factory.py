@@ -16,10 +16,9 @@
 #     Alberto Ferrer Sánchez (alberefe@gmail.com)
 #
 
-import getpass
 import logging
-import os
 
+from . import HashicorpVaultError, BitwardenCLIError
 from .aws_manager import AwsManager
 from .bw_manager import BitwardenManager
 from .hc_manager import HashicorpManager
@@ -32,31 +31,18 @@ class SecretsManagerFactory:
     @staticmethod
     def get_bitwarden_manager(email=None, password=None):
         """
-        Gets or creates a BitwardenManager instance.
+            Gets or creates a BitwardenManager instance.
 
-        :param email: Bitwarden email. If not provided,
-                      will try environment variables or prompt.
-        :type email: str, optional
-        :param password: Bitwarden password. If not provided,
-                         will try environment variables or prompt.
-        :type password: str, optional
+        :param str email: Bitwarden email.
+        :param str password: Bitwarden password.
         :returns: The singleton BitwardenManager instance
         :rtype: BitwardenManager
-        :raises ValueError: If credentials cannot be obtained
+        :raises BitwardenCLIError: If credentials cannot be obtained
         """
         logger.debug("Creating new Bitwarden manager")
 
-        if email is None:
-            email = os.environ.get("GRIMOIRELAB_BW_EMAIL")
-        if password is None:
-            password = os.environ.get("GRIMOIRELAB_BW_PASSWORD")
-
         if not email or not password:
-            email = input("Bitwarden email: ")
-            password = getpass.getpass("Bitwarden master password: ")
-
-            if not email or not password:
-                raise ValueError("Bitwarden credentials are required")
+            raise BitwardenCLIError("Bitwarden credentials are required")
 
         return BitwardenManager(email, password)
 
@@ -77,33 +63,16 @@ class SecretsManagerFactory:
         """
         Gets or creates a HashicorpManager instance.
 
-        :param vault_addr: Vault address.
-        :type vault_addr: str, optional
-        :param token: Vault token.
-        :type token: str, optional
-        :param certificate: Path to CA certificate.
-        :type certificate: str, optional
+        :param str vault_addr: Vault address.
+        :param str token: Vault token.
+        :param str certificate: Path to CA certificate.
         :returns: The singleton HashicorpManager instance
         :rtype: HashicorpManager
-        :raises ValueError: If required credentials cannot be obtained
+        :raises HashicorpVaultError: If required credentials cannot be obtained
         """
         logger.debug("Creating new Hashicorp manager")
 
-        if vault_addr is None:
-            vault_addr = os.environ.get("GRIMOIRELAB_VAULT_ADDR")
-        if token is None:
-            token = os.environ.get("GRIMOIRELAB_VAULT_TOKEN")
-        if certificate is None:
-            certificate = os.environ.get("GRIMOIRELAB_VAULT_CACERT")
-
-        if not vault_addr:
-            vault_addr = input("Please enter vault address: ")
-        if not token:
-            token = input("Please enter vault token: ")
-        if not certificate:
-            certificate = input("Please enter path to a PEM-encoded CA certificate file: ")
-
         if not all([vault_addr, token, certificate]):
-            raise ValueError("All Hashicorp Vault credentials are required")
+            raise HashicorpVaultError("All Hashicorp Vault credentials are required")
 
         return HashicorpManager(vault_addr, token, certificate)
