@@ -1,4 +1,3 @@
-# -*- coding: utf-8 -*-
 #
 #
 #
@@ -21,5 +20,44 @@
 
 from .credential_manager import get_secret
 from .secrets_manager_factory import SecretsManagerFactory
+from .exceptions import (
+    CredentialManagerError,
+    AuthenticationError,
+    InvalidCredentialsError,
+    SessionExpiredError,
+    SessionNotFoundError,
+    ConnectionError,
+    ServiceUnavailableError,
+    NetworkTimeoutError,
+    ConfigurationError,
+    SecretRetrievalError,
+    SecretNotFoundError,
+    CredentialNotFoundError,
+    InvalidSecretFormatError,
+    BitwardenCLIError,
+    AWSSecretsManagerError,
+    HashicorpVaultError,
+    UnsupportedSecretsManagerError,
+)
 
-__all__ = ["get_secret", "SecretsManagerFactory"]
+__all__ = [
+    "get_secret",
+    "SecretsManagerFactory",
+    "CredentialManagerError",
+    "AuthenticationError",
+    "InvalidCredentialsError",
+    "SessionExpiredError",
+    "SessionNotFoundError",
+    "ConnectionError",
+    "ServiceUnavailableError",
+    "NetworkTimeoutError",
+    "ConfigurationError",
+    "SecretRetrievalError",
+    "SecretNotFoundError",
+    "CredentialNotFoundError",
+    "InvalidSecretFormatError",
+    "BitwardenCLIError",
+    "AWSSecretsManagerError",
+    "HashicorpVaultError",
+    "UnsupportedSecretsManagerError",
+]
