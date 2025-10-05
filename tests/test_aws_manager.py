@@ -1,132 +1,146 @@
-import pytest
+# This program is free software; you can redistribute it and/or modify
+# it under the terms of the GNU General Public License as published by
+# the Free Software Foundation; either version 3 of the License, or
+# (at your option) any later version.
+#
+# This program is distributed in the hope that it will be useful,
+# but WITHOUT ANY WARRANTY; without even the implied warranty of
+# MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE. See the
+# GNU General Public License for more details.
+#
+# You should have received a copy of the GNU General Public License
+# along with this program. If not, see <http://www.gnu.org/licenses/>.
+#
+# Author:
+#     Alberto Ferrer Sánchez (alberefe@gmail.com)
+#
+
+import unittest
 from unittest.mock import patch, MagicMock
-import json
 from botocore.exceptions import ClientError, EndpointConnectionError, SSLError
 
 from grimoirelab_toolkit.credential_manager.aws_manager import AwsManager
+from grimoirelab_toolkit.credential_manager.exceptions import SecretNotFoundError, AWSSecretsManagerError
 
-MOCK_SECRET_RESPONSE = {
-    "ARN": "arn:aws:secretsmanager:region:account:secret:test-secret-123456",
-    "Name": "test-secret",
-    "VersionId": "12345678-1234-1234-1234-123456789012",
-    "SecretString": '{"username": "test_user", "password": "test_pass", "api_key": "test_key"}',
-    "VersionStages": ["AWSCURRENT"]
-}
 
-def test_initialization():
-    """Test successful initialization"""
-    with patch('boto3.client') as mock_boto:
+class TestAwsManager(unittest.TestCase):
+    """AwsManager unit tests"""
+
+    def setUp(self):
+        """Set up test fixtures"""
+        self.mock_secret_response = {
+            "ARN": "arn:aws:secretsmanager:region:account:secret:test-secret-123456",
+            "Name": "test-secret",
+            "VersionId": "12345678-1234-1234-1234-123456789012",
+            "SecretString": '{"username": "test_user", "password": "test_pass", "api_key": "test_key"}',
+            "VersionStages": ["AWSCURRENT"],
+        }
+
+    @patch("boto3.client")
+    def test_initialization(self, mock_boto):
+        """Test successful initialization"""
         mock_boto.return_value = MagicMock()
         manager = AwsManager()
-        mock_boto.assert_called_once_with('secretsmanager')
-        assert manager.client is not None
+        mock_boto.assert_called_once_with("secretsmanager")
+        self.assertIsNotNone(manager.client)
 
-def test_initialization_endpoint_error():
-    """Test initialization failure due to endpoint error"""
-    with patch('boto3.client') as mock_boto:
+    @patch("boto3.client")
+    def test_initialization_endpoint_error(self, mock_boto):
+        """Test initialization failure due to endpoint error"""
         mock_boto.side_effect = EndpointConnectionError(endpoint_url="http://example.com")
-        with pytest.raises(EndpointConnectionError):
+        with self.assertRaises(EndpointConnectionError):
             AwsManager()
 
-def test_initialization_ssl_error():
-    """Test initialization failure due to SSL error"""
-    with patch('boto3.client') as mock_boto:
-        mock_boto.side_effect = SSLError(
-            error="SSL Validation failed",
-            endpoint_url="http://example.com"
-        )
-        with pytest.raises(SSLError):
+    @patch("boto3.client")
+    def test_initialization_ssl_error(self, mock_boto):
+        """Test initialization failure due to SSL error"""
+        mock_boto.side_effect = SSLError(error="SSL Validation failed", endpoint_url="http://example.com")
+        with self.assertRaises(SSLError):
             AwsManager()
 
-def test_retrieve_and_format_credentials_success():
-    """Test successful retrieval and formatting of credentials"""
-    with patch('boto3.client') as mock_boto:
+    @patch("boto3.client")
+    def test_retrieve_and_format_credentials_success(self, mock_boto):
+        """Test successful retrieval and formatting of credentials"""
         mock_client = MagicMock()
-        mock_client.get_secret_value.return_value = MOCK_SECRET_RESPONSE
+        mock_client.get_secret_value.return_value = self.mock_secret_response
         mock_boto.return_value = mock_client
 
         manager = AwsManager()
         result = manager._retrieve_and_format_credentials("test-secret")
 
-        assert result["username"] == "test_user"
-        assert result["password"] == "test_pass"
-        assert result["api_key"] == "test_key"
+        self.assertEqual(result["username"], "test_user")
+        self.assertEqual(result["password"], "test_pass")
+        self.assertEqual(result["api_key"], "test_key")
 
-def test_retrieve_and_format_credentials_not_found():
-    """Test handling of non-existent secrets"""
-    with patch('boto3.client') as mock_boto:
+    @patch("boto3.client")
+    def test_retrieve_and_format_credentials_not_found(self, mock_boto):
+        """Test handling of non-existent secrets"""
         mock_client = MagicMock()
-        error_response = {
-            'Error': {
-                'Code': 'ResourceNotFoundException',
-                'Message': 'Secret not found'
-            }
-        }
+        error_response = {"Error": {"Code": "ResourceNotFoundException", "Message": "Secret not found"}}
 
-        mock_client.get_secret_value.side_effect = ClientError(
-            error_response, 'GetSecretValue'
-        )
+        mock_client.get_secret_value.side_effect = ClientError(error_response, "GetSecretValue")
         mock_boto.return_value = mock_client
 
         manager = AwsManager()
 
-        with pytest.raises(Exception):
+        with self.assertRaises(SecretNotFoundError):
             manager._retrieve_and_format_credentials("nonexistent-secret")
 
-def test_retrieve_and_format_credentials_invalid_json():
-    """Test handling of invalid JSON in secret value"""
-    with patch('boto3.client') as mock_boto:
+    @patch("boto3.client")
+    def test_retrieve_and_format_credentials_invalid_json(self, mock_boto):
+        """Test handling of invalid JSON in secret value"""
+        from grimoirelab_toolkit.credential_manager.exceptions import InvalidSecretFormatError
+
         mock_client = MagicMock()
-        invalid_response = MOCK_SECRET_RESPONSE.copy()
-        invalid_response['SecretString'] = 'invalid json'
+        invalid_response = self.mock_secret_response.copy()
+        invalid_response["SecretString"] = "invalid json"
         mock_client.get_secret_value.return_value = invalid_response
         mock_boto.return_value = mock_client
 
         manager = AwsManager()
 
-        with pytest.raises(json.JSONDecodeError):
+        with self.assertRaises(InvalidSecretFormatError):
             manager._retrieve_and_format_credentials("test-secret")
 
-def test_get_secret_success():
-    """Test successful secret retrieval"""
-    with patch('boto3.client') as mock_boto:
+    @patch("boto3.client")
+    def test_get_secret_success(self, mock_boto):
+        """Test successful secret retrieval"""
         mock_client = MagicMock()
-        mock_client.get_secret_value.return_value = MOCK_SECRET_RESPONSE
+        mock_client.get_secret_value.return_value = self.mock_secret_response
         mock_boto.return_value = mock_client
 
         manager = AwsManager()
 
         result = manager.get_secret("test-secret", "api_key")
-        assert result == "test_key"
+        self.assertEqual(result, "test_key")
 
-def test_get_secret_missing_credential():
-    """Test handling of non existant credential"""
-    with patch('boto3.client') as mock_boto:
+    @patch("boto3.client")
+    def test_get_secret_missing_credential(self, mock_boto):
+        """Test handling of non existant credential"""
+        from grimoirelab_toolkit.credential_manager.exceptions import CredentialNotFoundError
+
         mock_client = MagicMock()
-        mock_client.get_secret_value.return_value = MOCK_SECRET_RESPONSE
+        mock_client.get_secret_value.return_value = self.mock_secret_response
         mock_boto.return_value = mock_client
 
         manager = AwsManager()
 
-        result = manager.get_secret("test-secret", "nonexistent_credential")
-        assert result == ""
+        with self.assertRaises(CredentialNotFoundError):
+            manager.get_secret("test-secret", "nonexistent_credential")
 
-def test_get_secret_service_error():
-    """Test handling of AWS service errors"""
-    with patch('boto3.client') as mock_boto:
+    @patch("boto3.client")
+    def test_get_secret_service_error(self, mock_boto):
+        """Test handling of AWS service errors"""
         mock_client = MagicMock()
-        error_response = {
-            'Error': {
-                'Code': 'InternalServiceError',
-                'Message': 'Internal service error'
-            }
-        }
-        mock_client.get_secret_value.side_effect = ClientError(
-            error_response, 'GetSecretValue'
-        )
+        error_response = {"Error": {"Code": "InternalServiceError", "Message": "Internal service error"}}
+        mock_client.get_secret_value.side_effect = ClientError(error_response, "GetSecretValue")
         mock_boto.return_value = mock_client
 
         manager = AwsManager()
 
-        with pytest.raises(Exception):
+        with self.assertRaises(AWSSecretsManagerError):
             manager.get_secret("test-secret", "api_key")
+
+
+if __name__ == "__main__":
+    unittest.main(warnings="ignore")
