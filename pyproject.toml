@@ -1,6 +1,6 @@
 [tool.poetry]
 name = "grimoirelab-toolkit"
-version = "1.0.13"
+version = "1.1.0"
 description = "Toolkit of common functions used across GrimoireLab"
 authors = [
     "GrimoireLab Developers"
@@ -37,7 +37,7 @@ classifiers = [
 ]
 
 [tool.poetry.dependencies]
-python = "^3.9"
+python = "^3.10"
 python-dateutil = "^2.8.2"
 hvac = ">= 2.3.0"
 boto3 = ">= 1.35.63"
