@@ -1,5 +1,15 @@
 # Releases
 
+## grimoirelab-toolkit 1.2.0 - (2025-10-10)
+
+**New features:**
+
+ * Identity management functions\
+   Introduce a new module for managing identities. It includes functions
+   to generate a UUID based on identity data and to convert Unicode
+   strings to their unaccented form.
+
+
 ## grimoirelab-toolkit 1.1.0 - (2025-09-23)
 
 **New features:**
