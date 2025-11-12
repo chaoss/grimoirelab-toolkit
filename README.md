@@ -59,6 +59,121 @@ To spaw a new shell within the virtual environment use:
 $ poetry shell
 ```
 
+## Credential Manager Library
+
+This is a module made to retrieve credentials from different secrets management systems like Bitwarden.
+It accesses the secrets management service, looks for the desired credential and returns it in String form.
+
+To use the module in your python code
+
+### Bitwarden
+
+```
+from grimoirelab_toolkit.credential_manager import BitwardenManager
+
+
+# Instantiate the Bitwarden manager using the api credentials for login
+bw_manager = BitwardenManager("your_client_id", "your_client_secret", "your_master_password")
+
+# Login
+bw_manager.login()
+
+# Retrieve a secret from Bitwarden
+username = bw_manager.get_secret("github")
+password = bw_manager.get_secret("elasticsearch")
+
+# Logout
+bw_manager.logout()
+```
+
+
+#### Response format
+
+When calling `get_secret(item_name)`, the method returns a JSON object with the following structure:
+
+_NOTE: the parameter "item_name" corresponds with the field "name" of the json. That's the name of the item._
+(in this case, GitHub)
+
+
+##### Example Response
+
+  ```json
+  {
+    "passwordHistory": [
+      {
+        "lastUsedDate": "2024-11-05T10:27:18.411Z",
+        "password": "previous_password_value_1"
+      },
+      {
+        "lastUsedDate": "2024-11-05T09:20:06.512Z",
+        "password": "previous_password_value_2"
+      }
+    ],
+    "revisionDate": "2025-05-11T14:40:19.456Z",
+    "creationDate": "2024-10-30T18:56:41.023Z",
+    "object": "item",
+    "id": "91300380-620f-4707-8de1-b21901383315",
+    "organizationId": null,
+    "folderId": null,
+    "type": 1,
+    "reprompt": 0,
+    "name": "GitHub",
+    "notes": null,
+    "favorite": false,
+    "fields": [
+      {
+        "name": "api-token",
+        "value": "TOKEN"
+        "type": 0,
+        "linkedId": null
+      },
+      {
+        "name": "api_key",
+        "value": "APIKEY",
+        "type": 0,
+        "linkedId": null
+      }
+    ],
+    "login": {
+      "uris": [],
+      "username": "your_username",
+      "password": "your_password",
+      "totp": null,
+      "passwordRevisionDate": "2024-11-05T10:27:18.411Z"
+    },
+    "collectionIds": [],
+    "attachments": []
+  }
+```
+
+  Field Descriptions
+
+  - passwordHistory: Array of previously used passwords with timestamps
+  - revisionDate: Last modification timestamp (ISO 8601 format)
+  - creationDate: Item creation timestamp (ISO 8601 format)
+  - object: Always "item" for credential items
+  - id: Unique identifier for this item
+  - organizationId: Organization ID if shared, null for personal items
+  - folderId: Folder ID if organized, null otherwise
+  - type: Item type (1 = login, 2 = secure note, 3 = card, 4 = identity)
+  - name: Display name of the credential item (name used as argument in get_secret())
+  - notes: Optional notes field
+  - favorite: Boolean indicating if item is favorited
+  - fields: Array of custom fields with name-value pairs
+    - name: Field name
+    - value: Field value (can contain secrets)
+    - type: Field type (0 = text, 1 = hidden, 2 = boolean)
+  - login: Login credentials object
+    - username: Login username
+    - password: Login password
+    - totp: TOTP secret for 2FA (if configured)
+    - uris: Array of associated URIs/URLs
+    - passwordRevisionDate: Last password change timestamp
+  - collectionIds: Array of collection IDs this item belongs to
+  - attachments: Array of file attachments
+
+The module uses the [Bitwarden CLI](https://bitwarden.com/help/cli/) to interact with Bitwarden.
+
 ## License
 
 Licensed under GNU General Public License (GPL), version 3 or later.
