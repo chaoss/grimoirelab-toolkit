@@ -174,6 +174,91 @@ _NOTE: the parameter "item_name" corresponds with the field "name" of the json. 
 
 The module uses the [Bitwarden CLI](https://bitwarden.com/help/cli/) to interact with Bitwarden.
 
+### HashiCorp Vault
+
+
+#### Installing the dependency
+
+This module uses hvac library, which is set as optional module in pyproject.toml.
+
+ 1. Normal install: poetry install --with hashicorp-manager
+ 2. For development: poetry install --with hashicorp-manager --with dev
+
+
+#### Example use
+
+```python
+from grimoirelab_toolkit.credential_manager.hc_manager import HashicorpManager
+
+
+# Instantiate the HashiCorp Vault manager using the vault URL and token
+# The certificate can be a boolean (True/False) or a path to a CA bundle file
+hc_manager = HashicorpManager("https://vault.example.com", "your_token", certificate=True)
+
+# Retrieve a secret from HashiCorp Vault
+github_secret = hc_manager.get_secret("github")
+elasticsearch_secret = hc_manager.get_secret("elasticsearch")
+```
+
+#### Response format
+
+When calling `get_secret(item_name)`, the method returns a JSON object with the following structure:
+
+_NOTE: the parameter "item_name" corresponds to the secret path in HashiCorp Vault._
+
+##### Example Response
+
+```json
+{
+  "request_id": "d09e2bb5-00ee-576b-6078-5d291d35ccc3",
+  "lease_id": "",
+  "renewable": false,
+  "lease_duration": 0,
+  "data": {
+    "data": {
+      "username": "test_user",
+      "password": "test_pass",
+      "api_key": "test_key"
+    },
+    "metadata": {
+      "created_time": "2024-11-23T12:20:59.985132927Z",
+      "custom_metadata": null,
+      "deletion_time": "",
+      "destroyed": false,
+      "version": 1
+    }
+  },
+  "wrap_info": null,
+  "warnings": null,
+  "auth": null,
+  "mount_type": "kv"
+}
+```
+
+Field Descriptions
+
+- request_id: Unique identifier for this Vault request
+- lease_id: Lease identifier for renewable secrets (empty for KV secrets)
+- renewable: Boolean indicating if the secret is renewable
+- lease_duration: Lease duration in seconds (0 for KV secrets)
+- data: Main data object containing the secret
+  - data: The actual secret key-value pairs
+    - username: Username credential
+    - password: Password credential
+    - api_key: API key or other custom fields
+  - metadata: Vault metadata for this secret
+    - created_time: Secret creation timestamp (ISO 8601 format)
+    - custom_metadata: Custom metadata if configured
+    - deletion_time: Soft deletion timestamp (empty if not deleted)
+    - destroyed: Boolean indicating if secret version is destroyed
+    - version: Secret version number
+- wrap_info: Response wrapping information (null if not wrapped)
+- warnings: Array of warning messages (null if none)
+- auth: Authentication information (null for read operations)
+- mount_type: Type of secrets engine (typically "kv" for key-value)
+
+The module uses the [hvac](https://hvac.readthedocs.io/) Python library to interact with HashiCorp Vault.
+
 ## License
 
 Licensed under GNU General Public License (GPL), version 3 or later.
