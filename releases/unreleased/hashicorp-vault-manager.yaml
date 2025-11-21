@@ -1,0 +1,9 @@
+title: 'Add HashiCorp Vault credential manager'
+category: added
+author: Alberto Ferrer Sánchez <alberefe@gmail.com>
+issue:
+notes: >
+    Implement automated credential management system with HashiCorp Vault
+    integration. This allows the user to retrieve secrets from HashiCorp Vault
+    service without the need to hardcode them in config files or
+    having to write them manually.
