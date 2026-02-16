@@ -26,6 +26,7 @@ __all__ = [
     "InvalidCredentialsError",
     "CredentialNotFoundError",
     "BitwardenCLIError",
+    "HashicorpVaultError",
 ]
 
 
@@ -49,5 +50,11 @@ class CredentialNotFoundError(CredentialManagerError):
 
 class BitwardenCLIError(CredentialManagerError):
     """Raised for Bitwarden CLI specific errors."""
+
+    pass
+
+
+class HashicorpVaultError(CredentialManagerError):
+    """Raised for HashiCorp Vault-specific operation errors."""
 
     pass
