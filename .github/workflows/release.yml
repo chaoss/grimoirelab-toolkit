@@ -36,8 +36,7 @@ jobs:
           python-version: ${{ matrix.python-version }}
       - name: Test package
         run: |
-          PACKAGE_NAME=`(cd dist && ls *whl | cut -f 1 -d "-")` && echo $PACKAGE_NAME
-          pip install --pre --find-links ./dist/ $PACKAGE_NAME
+          pip install --pre --find-links ./dist/ "grimoirelab-toolkit[hashicorp-manager]"
           cd tests && python run_tests.py
 
   release:
