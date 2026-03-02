@@ -150,6 +150,33 @@ class TestHashicorpManager(unittest.TestCase):
 
         self.assertIn("Vault operation failed", str(context.exception))
 
+    @patch("hvac.Client")
+    def test_extract_field_success(self, mock_hvac_client):
+        """Test extracting an existing field from a secret."""
+
+        manager = HashicorpManager(self.vault_url, self.token, self.certificate)
+        result = manager.extract_field(self.mock_secret_response, "username")
+
+        self.assertEqual(result, "test_user")
+
+    @patch("hvac.Client")
+    def test_extract_field_not_found(self, mock_hvac_client):
+        """Test extracting a non-existent field returns None."""
+
+        manager = HashicorpManager(self.vault_url, self.token, self.certificate)
+        result = manager.extract_field(self.mock_secret_response, "nonexistent")
+
+        self.assertIsNone(result)
+
+    @patch("hvac.Client")
+    def test_extract_field_empty_secret(self, mock_hvac_client):
+        """Test extracting a field from an empty secret returns None."""
+
+        manager = HashicorpManager(self.vault_url, self.token, self.certificate)
+        result = manager.extract_field({}, "username")
+
+        self.assertIsNone(result)
+
 
 if __name__ == "__main__":
     unittest.main(warnings="ignore")

@@ -21,12 +21,13 @@ import logging
 import hvac
 import hvac.exceptions
 
+from .credential_manager import CredentialManager
 from .exceptions import HashicorpVaultError, CredentialNotFoundError
 
 logger = logging.getLogger(__name__)
 
 
-class HashicorpManager:
+class HashicorpManager(CredentialManager):
     """Retrieve credentials from HashiCorp Vault.
 
     This class defines functions to initialize a client and retrieve
@@ -54,16 +55,10 @@ class HashicorpManager:
             verification should be performed, a string pointing at the CA bundle to use for
             verification
 
-        :raises ConnectionError: If connection issues occur
         """
-        try:
-            logger.debug("Creating Vault client")
-            # Initialize client with URL, token, and certificate verification setting
-            self.client = hvac.Client(url=vault_url, token=token, verify=certificate)
-            logger.debug("Vault client initialized successfully")
-        except Exception as e:
-            logger.error("An error occurred initializing the client: %s", str(e))
-            raise e
+        logger.debug("Creating Vault client")
+        self.client = hvac.Client(url=vault_url, token=token, verify=certificate)
+        logger.debug("Vault client initialized successfully")
 
     def get_secret(self, item_name: str) -> dict:
         """Retrieve an item from the HashiCorp Vault.
@@ -85,7 +80,7 @@ class HashicorpManager:
         :raises HashicorpVaultError: If Vault operations fail
         """
         try:
-            logger.info("Retrieving credentials from vault: %s", item_name)
+            logger.debug("Retrieving credentials from vault: %s", item_name)
             # Read secret from KV secrets engine
             secret = self.client.secrets.kv.read_secret(path=item_name)
             return secret
@@ -97,3 +92,17 @@ class HashicorpManager:
         except Exception as e:
             logger.error("Error retrieving the secret: %s", str(e))
             raise HashicorpVaultError(f"Vault operation failed: {e}")
+
+    def extract_field(self, secret: dict, field_name: str) -> str | None:
+        """Extract a field value from a HashiCorp Vault secret.
+
+        Reads from secret['data']['data'][field_name].
+
+        :param dict secret: The HashiCorp Vault secret dictionary
+        :param str field_name: The name of the field to extract
+
+        :returns: The field value or None if not found
+        :rtype: str or None
+        """
+        secret_data = secret.get('data', {}).get('data', {})
+        return secret_data.get(field_name)

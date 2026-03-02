@@ -172,6 +172,15 @@ _NOTE: the parameter "item_name" corresponds with the field "name" of the json. 
   - collectionIds: Array of collection IDs this item belongs to
   - attachments: Array of file attachments
 
+#### Session isolation
+
+Each `BitwardenManager` instance creates its own temporary directory and
+sets the `BITWARDENCLI_APPDATA_DIR` environment variable to point to it.
+This means multiple instances can run in parallel without sharing login
+state or session keys. The `HOME` variable is also forwarded so the CLI
+can resolve paths correctly. The temporary directory is cleaned up
+automatically when `logout()` is called.
+
 The module uses the [Bitwarden CLI](https://bitwarden.com/help/cli/) to interact with Bitwarden.
 
 ### HashiCorp Vault
@@ -258,6 +267,64 @@ Field Descriptions
 - mount_type: Type of secrets engine (typically "kv" for key-value)
 
 The module uses the [hvac](https://hvac.readthedocs.io/) Python library to interact with HashiCorp Vault.
+
+### `resolve_credentials()` — Unified credential resolution
+
+The `CredentialManager` base class provides a `resolve_credentials()` method that
+orchestrates login, secret fetching, field extraction, and logout in a single
+call. It is available on any credential manager instance (`BitwardenManager`,
+`HashicorpManager`).
+
+This method is designed to work independently of any CLI framework, making
+it usable from Perceval's `BackendCommand`, KingArthur, or any custom script.
+
+#### Example
+
+```python
+from grimoirelab_toolkit.credential_manager import BitwardenManager
+from grimoirelab_toolkit.credential_manager.hc_manager import HashicorpManager
+
+# Bitwarden example
+bw_manager = BitwardenManager("your-client-id", "your-client-secret", "your-master-password")
+credentials = bw_manager.resolve_credentials("GitHub", ["api_token", "user"])
+# credentials = {'api_token': 'ghp_...', 'user': 'myuser'}
+
+# HashiCorp example
+hc_manager = HashicorpManager("https://vault.example.com", "hvs.your-token")
+credentials = hc_manager.resolve_credentials("secret/my-service", ["api_token"])
+```
+
+#### Parameters
+
+- `item_name` (`str`) — Name/path of the secret item in the vault
+- `field_names` (`list[str]`) — List of field names to look up in the vault. Field names must match the names used when storing the secret.
+
+#### Return value
+
+A `dict[str, str]` mapping field names to resolved string values.
+Only fields that were found are included in the result. Missing fields
+produce a warning log and are omitted (partial results are valid).
+
+#### Field extraction behavior
+
+Each manager returns secrets in a different format. `resolve_credentials()`
+normalizes the extraction via each manager's `extract_field()` implementation:
+
+- **Bitwarden**: Checks `item['login']` dict first (for username, password),
+  then searches the `item['fields']` array (for custom fields like API tokens).
+- **HashiCorp**: Reads from `secret['data']['data'][field_name]`.
+
+#### Error handling
+
+- Empty `item_name` raises `ValueError`
+- Secret item not found raises `CredentialNotFoundError`
+- Individual missing fields are skipped with a warning (no error)
+- `logout()` is always called in a `finally` block
+
+### Optional dependencies
+
+- **Bitwarden**: requires `bw` CLI on `PATH` (no Python package needed)
+- **HashiCorp**: requires `hvac` (`poetry install --with hashicorp-manager`)
 
 ## License
 
