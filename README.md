@@ -259,6 +259,89 @@ Field Descriptions
 
 The module uses the [hvac](https://hvac.readthedocs.io/) Python library to interact with HashiCorp Vault.
 
+### `resolve_credentials()` — Unified credential resolution
+
+The `resolve_credentials()` function provides a high-level interface to
+fetch and extract credentials from any supported secrets manager in a single
+call. It handles manager instantiation, authentication, secret retrieval,
+field extraction, and cleanup automatically.
+
+This function is designed to work independently of any CLI framework, making
+it usable from Perceval's `BackendCommand`, KingArthur, or any custom script.
+
+#### Example
+
+```python
+from grimoirelab_toolkit.credential_manager import resolve_credentials
+
+# Bitwarden example
+credentials = resolve_credentials(
+    manager_type='bitwarden',
+    manager_config={
+        'client_id': 'your-client-id',
+        'client_secret': 'your-client-secret',
+        'master_password': 'your-master-password',
+    },
+    item_name='GitHub',
+    field_mapping={'api-token': 'api_token', 'username': 'user'},
+)
+# credentials = {'api_token': 'ghp_...', 'user': 'myuser'}
+
+# HashiCorp example
+credentials = resolve_credentials(
+    manager_type='hashicorp',
+    manager_config={
+        'vault_url': 'https://vault.example.com',
+        'token': 'hvs.your-token',
+    },
+    item_name='secret/my-service',
+    field_mapping={'api_key': 'api_token'},
+)
+```
+
+#### Parameters
+
+- `manager_type` (`str`) — `"bitwarden"` or `"hashicorp"`
+- `manager_config` (`dict`) — Manager-specific authentication credentials (see below)
+- `item_name` (`str`) — Name/path of the secret item in the vault
+- `field_mapping` (`dict[str, str]`) — Maps secret field names to output parameter names
+
+#### Manager config by provider
+
+- **Bitwarden**: `client_id`, `client_secret`, `master_password`
+- **HashiCorp**: `vault_url`, `token`, `certificate` (optional)
+
+#### Return value
+
+A `dict[str, str]` mapping output parameter names to resolved string values.
+Only fields that were found are included in the result. Missing fields
+produce a warning log and are omitted (partial results are valid).
+
+#### Field extraction behavior
+
+Each manager returns secrets in a different format. `resolve_credentials()`
+normalizes the extraction:
+
+- **Bitwarden**: Checks `item['login']` dict first (for username, password),
+  then searches the `item['fields']` array (for custom fields like API tokens).
+- **HashiCorp**: Reads from `secret['data']['data'][field_name]`.
+
+#### Error handling
+
+- Unsupported `manager_type` raises `ValueError`
+- Empty `item_name` raises `ValueError`
+- Secret item not found raises `CredentialNotFoundError`
+- Individual missing fields are skipped with a warning (no error)
+- For Bitwarden, `logout()` is always called in a `finally` block
+
+### Optional dependencies (lazy imports)
+
+The secrets manager providers use lazy imports, so you only need to install
+the dependencies for the provider you actually use:
+
+- **Bitwarden**: requires `bw` CLI on `PATH` (no Python package needed)
+- **HashiCorp**: requires `hvac` (`poetry install --with hashicorp-manager`)
+
 ## License
 
 Licensed under GNU General Public License (GPL), version 3 or later.
