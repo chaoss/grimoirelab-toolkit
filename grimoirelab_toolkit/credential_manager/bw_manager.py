@@ -1,5 +1,6 @@
+# -*- coding: utf-8 -*-
 #
-#
+# Copyright (C) Grimoirelab Contributors
 #
 # This program is free software; you can redistribute it and/or modify
 # it under the terms of the GNU General Public License as published by
@@ -14,14 +15,16 @@
 # You should have received a copy of the GNU General Public License
 # along with this program. If not, see <http://www.gnu.org/licenses/>.
 #
-# Author:
-#       Alberto Ferrer Sánchez (alberefe@gmail.com)
-#
+
+
 import json
+import os
 import subprocess
 import logging
 import shutil
+import tempfile
 
+from .credential_manager import CredentialManager
 from .exceptions import (
     BitwardenCLIError,
     InvalidCredentialsError,
@@ -31,7 +34,7 @@ from .exceptions import (
 logger = logging.getLogger(__name__)
 
 
-class BitwardenManager:
+class BitwardenManager(CredentialManager):
     """Retrieve credentials from Bitwarden.
 
     This class defines functions to log in, retrieve secrets
@@ -47,6 +50,13 @@ class BitwardenManager:
     The manager logs in using the client_id, client_secret, and
     master_password given as arguments when creating the instance,
     so the object is reusable along the program.
+
+    Each instance creates an isolated temporary directory used as
+    ``BITWARDENCLI_APPDATA_DIR``, so multiple instances can run in
+    parallel without sharing session state. The ``HOME`` environment
+    variable is also forwarded so that the Bitwarden CLI can locate
+    its configuration. The temporary directory is cleaned up
+    automatically when manager.logout is called.
 
     The path of Bitwarden CLI (bw) is retrieved using shutil.
     """
@@ -72,11 +82,15 @@ class BitwardenManager:
         if not self.bw_path:
             raise BitwardenCLIError("Bitwarden CLI (bw) not found in PATH")
 
-        # Set up environment variables for consistent execution context
+        # Each instance gets its own appdata dir so parallel sessions
+        # don't share state and bw can find its config directory.
+        self._appdata_dir = tempfile.mkdtemp(prefix="bw_session_")
         self.env = {
+            "HOME": os.path.expanduser("~"),
             "LANG": "C",
             "BW_CLIENTID": client_id,
             "BW_CLIENTSECRET": client_secret,
+            "BITWARDENCLI_APPDATA_DIR": self._appdata_dir,
         }
 
     def login(self) -> str | None:
@@ -190,7 +204,9 @@ class BitwardenManager:
     def logout(self) -> None:
         """Log out from Bitwarden and invalidate the session.
 
-        This method ends the current session and clears the session key.
+        This method ends the current session, clears the session key,
+        and removes the temporary appdata directory created during
+        initialization to avoid leaving stale session data on disk.
         """
         logger.info("Logging out from Bitwarden")
 
@@ -209,4 +225,28 @@ class BitwardenManager:
         # Clear session key for security
         self.session_key = None
 
+        # Remove the temporary appdata directory
+        shutil.rmtree(self._appdata_dir, ignore_errors=True)
+
         logger.info("Successfully logged out from Bitwarden")
+
+    def extract_field(self, secret: dict, field_name: str) -> str | None:
+        """Extract a field value from a Bitwarden item.
+
+        Searches in the 'login' dict first, then in the 'fields' array.
+
+        :param dict secret: The Bitwarden item dictionary
+        :param str field_name: The name of the field to extract
+
+        :returns: The field value or None if not found
+        :rtype: str or None
+        """
+        login_data = secret.get('login', {})
+        if login_data and field_name in login_data:
+            return login_data[field_name]
+
+        for field in secret.get('fields', []):
+            if field.get('name') == field_name:
+                return field.get('value')
+
+        return None

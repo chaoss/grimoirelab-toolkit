@@ -15,22 +15,24 @@
 # You should have received a copy of the GNU General Public License
 # along with this program. If not, see <http://www.gnu.org/licenses/>.
 #
-# Author:
-#     Alberto Ferrer Sánchez (alberefe@gmail.com)
-#
+
 
 from .bw_manager import BitwardenManager
+from .credential_manager import CredentialManager
 from .exceptions import (
     CredentialManagerError,
     InvalidCredentialsError,
     CredentialNotFoundError,
     BitwardenCLIError,
+    HashicorpVaultError,
 )
 
 __all__ = [
+    "CredentialManager",
     "BitwardenManager",
     "CredentialManagerError",
     "InvalidCredentialsError",
     "CredentialNotFoundError",
     "BitwardenCLIError",
+    "HashicorpVaultError",
 ]

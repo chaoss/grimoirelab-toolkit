@@ -115,7 +115,7 @@ class TestHashicorpManager(unittest.TestCase):
         manager = HashicorpManager(self.vault_url, self.token, self.certificate)
 
         with self.assertRaises(CredentialNotFoundError) as context:
-            manager.get_secret("nonexistent_service")
+            manager.get_secret("nonexistent_serviceChange get_secret logging from INFO to DEBUG")
 
         self.assertIn("nonexistent_service", str(context.exception))
         self.assertIn("not found", str(context.exception))
@@ -149,6 +149,33 @@ class TestHashicorpManager(unittest.TestCase):
             manager.get_secret("test_service")
 
         self.assertIn("Vault operation failed", str(context.exception))
+
+    @patch("hvac.Client")
+    def test_extract_field_success(self, mock_hvac_client):
+        """Test extracting an existing field from a secret."""
+
+        manager = HashicorpManager(self.vault_url, self.token, self.certificate)
+        result = manager.extract_field(self.mock_secret_response, "username")
+
+        self.assertEqual(result, "test_user")
+
+    @patch("hvac.Client")
+    def test_extract_field_not_found(self, mock_hvac_client):
+        """Test extracting a non-existent field returns None."""
+
+        manager = HashicorpManager(self.vault_url, self.token, self.certificate)
+        result = manager.extract_field(self.mock_secret_response, "nonexistent")
+
+        self.assertIsNone(result)
+
+    @patch("hvac.Client")
+    def test_extract_field_empty_secret(self, mock_hvac_client):
+        """Test extracting a field from an empty secret returns None."""
+
+        manager = HashicorpManager(self.vault_url, self.token, self.certificate)
+        result = manager.extract_field({}, "username")
+
+        self.assertIsNone(result)
 
 
 if __name__ == "__main__":
