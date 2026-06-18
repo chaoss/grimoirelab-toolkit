@@ -268,12 +268,65 @@ Field Descriptions
 
 The module uses the [hvac](https://hvac.readthedocs.io/) Python library to interact with HashiCorp Vault.
 
+### AWS Secrets Manager
+
+
+#### Installing the dependency
+
+This module uses boto3 library, which is set as optional module in pyproject.toml.
+
+ 1. Normal install: poetry install --with aws-manager
+ 2. For development: poetry install --with aws-manager --with dev
+
+
+#### Example use
+
+```python
+from grimoirelab_toolkit.credential_manager.aws_manager import AwsManager
+
+
+# Instantiate the AWS Secrets Manager
+# Credentials are obtained automatically from the default AWS credential chain
+# (environment variables, ~/.aws/credentials, IAM role, etc.)
+aws_manager = AwsManager()
+
+# Retrieve a secret from AWS Secrets Manager
+github_secret = aws_manager.get_secret("github")
+elasticsearch_secret = aws_manager.get_secret("elasticsearch")
+```
+
+#### Response format
+
+When calling `get_secret(item_name)`, the method parses the `SecretString` field
+as JSON and returns the resulting dictionary.
+
+_NOTE: the parameter "item_name" corresponds to the secret name in AWS Secrets Manager._
+
+##### Example Response
+
+```json
+{
+  "username": "test_user",
+  "password": "test_pass",
+  "api_key": "test_key"
+}
+```
+
+Field Descriptions
+
+- The returned dictionary contains the key-value pairs stored in the secret's
+  `SecretString` field.
+- Secrets must be stored in AWS Secrets Manager as JSON strings.
+
+The module uses the [boto3](https://boto3.amazonaws.com/v1/documentation/api/latest/)
+Python library to interact with AWS Secrets Manager.
+
 ### `resolve_credentials()` — Unified credential resolution
 
 The `CredentialManager` base class provides a `resolve_credentials()` method that
 orchestrates login, secret fetching, field extraction, and logout in a single
 call. It is available on any credential manager instance (`BitwardenManager`,
-`HashicorpManager`).
+`HashicorpManager`, `AwsManager`).
 
 This method is designed to work independently of any CLI framework, making
 it usable from Perceval's `BackendCommand`, KingArthur, or any custom script.
@@ -313,6 +366,8 @@ normalizes the extraction via each manager's `extract_field()` implementation:
 - **Bitwarden**: Checks `item['login']` dict first (for username, password),
   then searches the `item['fields']` array (for custom fields like API tokens).
 - **HashiCorp**: Reads from `secret['data']['data'][field_name]`.
+- **AWS Secrets Manager**: Reads from `secret[field_name]` (flat lookup on the
+  parsed `SecretString` JSON).
 
 #### Error handling
 
@@ -325,6 +380,7 @@ normalizes the extraction via each manager's `extract_field()` implementation:
 
 - **Bitwarden**: requires `bw` CLI on `PATH` (no Python package needed)
 - **HashiCorp**: requires `hvac` (`poetry install --with hashicorp-manager`)
+- **AWS Secrets Manager**: requires `boto3` (`poetry install --with aws-manager`)
 
 ## License
 
