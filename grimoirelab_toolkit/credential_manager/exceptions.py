@@ -25,6 +25,7 @@ __all__ = [
     "CredentialNotFoundError",
     "BitwardenCLIError",
     "HashicorpVaultError",
+    "AWSSecretsManagerError",
 ]
 
 
@@ -54,5 +55,11 @@ class BitwardenCLIError(CredentialManagerError):
 
 class HashicorpVaultError(CredentialManagerError):
     """Raised for HashiCorp Vault-specific operation errors."""
+
+    pass
+
+
+class AWSSecretsManagerError(CredentialManagerError):
+    """Raised for AWS Secrets Manager-specific operation errors."""
 
     pass

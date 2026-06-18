@@ -25,6 +25,7 @@ from .exceptions import (
     CredentialNotFoundError,
     BitwardenCLIError,
     HashicorpVaultError,
+    AWSSecretsManagerError,
 )
 
 __all__ = [
@@ -35,4 +36,5 @@ __all__ = [
     "CredentialNotFoundError",
     "BitwardenCLIError",
     "HashicorpVaultError",
+    "AWSSecretsManagerError",
 ]
