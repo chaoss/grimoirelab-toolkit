@@ -1,4 +1,3 @@
-# -*- coding: utf-8 -*-
 #
 # Copyright (C) Grimoirelab Contributors
 #
@@ -22,7 +21,7 @@ import hvac
 import hvac.exceptions
 
 from .credential_manager import CredentialManager
-from .exceptions import HashicorpVaultError, CredentialNotFoundError
+from .exceptions import CredentialNotFoundError, HashicorpVaultError
 
 logger = logging.getLogger(__name__)
 
@@ -86,9 +85,7 @@ class HashicorpManager(CredentialManager):
             return secret
         except hvac.exceptions.InvalidPath:
             logger.error("The path %s does not exist in the vault", item_name)
-            raise CredentialNotFoundError(
-                f"Secret path '{item_name}' not found in Vault"
-            )
+            raise CredentialNotFoundError(f"Secret path '{item_name}' not found in Vault")
         except Exception as e:
             logger.error("Error retrieving the secret: %s", str(e))
             raise HashicorpVaultError(f"Vault operation failed: {e}")
@@ -104,5 +101,5 @@ class HashicorpManager(CredentialManager):
         :returns: The field value or None if not found
         :rtype: str or None
         """
-        secret_data = secret.get('data', {}).get('data', {})
+        secret_data = secret.get("data", {}).get("data", {})
         return secret_data.get(field_name)

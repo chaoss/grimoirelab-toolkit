@@ -1,5 +1,4 @@
 #!/usr/bin/env python3
-# -*- coding: utf-8 -*-
 #
 # Copyright (C) 2015-2020 Bitergia
 #
@@ -24,7 +23,6 @@
 
 """Functions for handling URIs."""
 
-
 __all__ = ["urijoin"]
 
 
@@ -41,4 +39,4 @@ def urijoin(*args):
 
     :returns: a URI string
     """
-    return '/'.join(map(lambda x: str(x).strip('/'), args))
+    return "/".join(map(lambda x: str(x).strip("/"), args))

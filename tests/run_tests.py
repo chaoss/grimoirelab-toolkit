@@ -1,5 +1,4 @@
 #!/usr/bin/env python3
-# -*- coding: utf-8 -*-
 #
 # Copyright (C) 2015-2020 Bitergia
 #
@@ -24,8 +23,7 @@
 import sys
 import unittest
 
-
-if __name__ == '__main__':
-    test_suite = unittest.TestLoader().discover('.', pattern='test_*.py')
+if __name__ == "__main__":
+    test_suite = unittest.TestLoader().discover(".", pattern="test_*.py")
     result = unittest.TextTestRunner(buffer=True).run(test_suite)
     sys.exit(not result.wasSuccessful())

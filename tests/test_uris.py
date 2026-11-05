@@ -1,5 +1,4 @@
 #!/usr/bin/env python3
-# -*- coding: utf-8 -*-
 #
 # Copyright (C) 2015-2020 Bitergia
 #
@@ -34,52 +33,52 @@ class TestURIJoin(unittest.TestCase):
     def test_join(self):
         """Test basic joins."""
 
-        base_url = 'http://example.com/'
-        base_url_alt = 'http://example.com'
-        path0 = 'owner'
-        path1 = 'repository'
-        path2 = '/owner/repository'
-        path3 = 'issues/8'
+        base_url = "http://example.com/"
+        base_url_alt = "http://example.com"
+        path0 = "owner"
+        path1 = "repository"
+        path2 = "/owner/repository"
+        path3 = "issues/8"
 
         url = urijoin(base_url, path0, path1)
-        self.assertEqual(url, 'http://example.com/owner/repository')
+        self.assertEqual(url, "http://example.com/owner/repository")
 
         url = urijoin(base_url, path2)
-        self.assertEqual(url, 'http://example.com/owner/repository')
+        self.assertEqual(url, "http://example.com/owner/repository")
 
         url = urijoin(base_url, path0, path1, path3)
-        self.assertEqual(url, 'http://example.com/owner/repository/issues/8')
+        self.assertEqual(url, "http://example.com/owner/repository/issues/8")
 
         url = urijoin(base_url_alt, path0, path1)
-        self.assertEqual(url, 'http://example.com/owner/repository')
+        self.assertEqual(url, "http://example.com/owner/repository")
 
     def test_remove_trailing_backslash(self):
         """Test if trailing backslash is removed from URLs."""
 
-        base_url = 'http://example.com/'
-        path0 = 'repository/'
+        base_url = "http://example.com/"
+        path0 = "repository/"
 
         url = urijoin(base_url)
-        self.assertEqual(url, 'http://example.com')
+        self.assertEqual(url, "http://example.com")
 
         url = urijoin(base_url, path0)
-        self.assertEqual(url, 'http://example.com/repository')
+        self.assertEqual(url, "http://example.com/repository")
 
     def test_remove_double_slash(self):
         """Test if double backslash are removed from URIs."""
 
-        base_url = 'http://example.com/'
-        path0 = '/repository/'
+        base_url = "http://example.com/"
+        path0 = "/repository/"
 
         url = urijoin(base_url, path0)
-        self.assertEqual(url, 'http://example.com/repository')
+        self.assertEqual(url, "http://example.com/repository")
 
-        base_uri = 'file:///tmp/'
-        path0 = '/repository//'
+        base_uri = "file:///tmp/"
+        path0 = "/repository//"
 
         url = urijoin(base_uri, path0)
-        self.assertEqual(url, 'file:///tmp/repository')
+        self.assertEqual(url, "file:///tmp/repository")
 
 
 if __name__ == "__main__":
-    unittest.main(warnings='ignore')
+    unittest.main(warnings="ignore")

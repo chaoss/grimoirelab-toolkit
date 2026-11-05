@@ -1,4 +1,3 @@
-# -*- coding: utf-8 -*-
 #
 # Copyright (C) Grimoirelab Contributors
 #
@@ -20,19 +19,19 @@
 from .bw_manager import BitwardenManager
 from .credential_manager import CredentialManager
 from .exceptions import (
-    CredentialManagerError,
-    InvalidCredentialsError,
-    CredentialNotFoundError,
     BitwardenCLIError,
+    CredentialManagerError,
+    CredentialNotFoundError,
     HashicorpVaultError,
+    InvalidCredentialsError,
 )
 
 __all__ = [
-    "CredentialManager",
-    "BitwardenManager",
-    "CredentialManagerError",
-    "InvalidCredentialsError",
-    "CredentialNotFoundError",
     "BitwardenCLIError",
+    "BitwardenManager",
+    "CredentialManager",
+    "CredentialManagerError",
+    "CredentialNotFoundError",
     "HashicorpVaultError",
+    "InvalidCredentialsError",
 ]

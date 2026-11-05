@@ -1,5 +1,4 @@
 #!/usr/bin/env python3
-# -*- coding: utf-8 -*-
 #
 # Copyright (C) 2015-2020 Bitergia
 #
@@ -31,12 +30,7 @@ such as `inspect`.
 
 import inspect
 
-
-__all__ = [
-    "inspect_signature_parameters",
-    "find_signature_parameters",
-    "find_class_properties"
-]
+__all__ = ["find_class_properties", "find_signature_parameters", "inspect_signature_parameters"]
 
 
 def inspect_signature_parameters(callable_, excluded=None):
@@ -55,15 +49,11 @@ def inspect_signature_parameters(callable_, excluded=None):
         excluded = ()
 
     signature = inspect.signature(callable_)
-    params = [
-        v for p, v in signature.parameters.items()
-        if p not in excluded
-    ]
+    params = [v for p, v in signature.parameters.items() if p not in excluded]
     return params
 
 
-def find_signature_parameters(callable_, candidates,
-                              excluded=('self', 'cls')):
+def find_signature_parameters(callable_, candidates, excluded=("self", "cls")):
     """Find on a set of candidates the parameters needed to execute a callable.
 
     Returns a dictionary with the `candidates` found on `callable_`.
@@ -81,15 +71,14 @@ def find_signature_parameters(callable_, candidates,
     :raises AttributeError: when any of the required parameters for
         executing a callable is not found in `candidates`
     """
-    signature_params = inspect_signature_parameters(callable_,
-                                                    excluded=excluded)
+    signature_params = inspect_signature_parameters(callable_, excluded=excluded)
     exec_params = {}
 
     add_all = False
     for param in signature_params:
         name = param.name
 
-        if str(param).startswith('*'):
+        if str(param).startswith("*"):
             add_all = True
         elif name in candidates:
             exec_params[name] = candidates[name]
@@ -117,8 +106,5 @@ def find_class_properties(cls):
     :returns: list of properties
     """
     candidates = inspect.getmembers(cls, inspect.isdatadescriptor)
-    result = [
-        (name, value) for name, value in candidates
-        if isinstance(value, property)
-    ]
+    result = [(name, value) for name, value in candidates if isinstance(value, property)]
     return result

@@ -1,4 +1,3 @@
-# -*- coding: utf-8 -*-
 #
 # Copyright (C) Grimoirelab Contributors
 #
@@ -20,39 +19,29 @@
 """Custom exceptions for the credential manager module."""
 
 __all__ = [
-    "CredentialManagerError",
-    "InvalidCredentialsError",
-    "CredentialNotFoundError",
     "BitwardenCLIError",
+    "CredentialManagerError",
+    "CredentialNotFoundError",
     "HashicorpVaultError",
+    "InvalidCredentialsError",
 ]
 
 
 class CredentialManagerError(Exception):
     """Base exception for all credential manager errors."""
 
-    pass
-
 
 class InvalidCredentialsError(CredentialManagerError):
     """Raised when invalid credentials are provided."""
-
-    pass
 
 
 class CredentialNotFoundError(CredentialManagerError):
     """Raised when a specific credential is not found in a secret."""
 
-    pass
-
 
 class BitwardenCLIError(CredentialManagerError):
     """Raised for Bitwarden CLI specific errors."""
 
-    pass
-
 
 class HashicorpVaultError(CredentialManagerError):
     """Raised for HashiCorp Vault-specific operation errors."""
-
-    pass

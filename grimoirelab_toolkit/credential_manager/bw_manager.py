@@ -1,4 +1,3 @@
-# -*- coding: utf-8 -*-
 #
 # Copyright (C) Grimoirelab Contributors
 #
@@ -18,17 +17,17 @@
 
 
 import json
-import os
-import subprocess
 import logging
+import os
 import shutil
+import subprocess
 import tempfile
 
 from .credential_manager import CredentialManager
 from .exceptions import (
     BitwardenCLIError,
-    InvalidCredentialsError,
     CredentialNotFoundError,
+    InvalidCredentialsError,
 )
 
 logger = logging.getLogger(__name__)
@@ -86,12 +85,14 @@ class BitwardenManager(CredentialManager):
         # don't share state and bw can find its config directory.
         self._appdata_dir = tempfile.mkdtemp(prefix="bw_session_")
         self.env = os.environ.copy()
-        self.env.update({
-            "LANG": "C",
-            "BW_CLIENTID": client_id,
-            "BW_CLIENTSECRET": client_secret,
-            "BITWARDENCLI_APPDATA_DIR": self._appdata_dir,
-        })
+        self.env.update(
+            {
+                "LANG": "C",
+                "BW_CLIENTID": client_id,
+                "BW_CLIENTSECRET": client_secret,
+                "BITWARDENCLI_APPDATA_DIR": self._appdata_dir,
+            }
+        )
 
     def login(self) -> str | None:
         """Log into Bitwarden.
@@ -114,13 +115,9 @@ class BitwardenManager(CredentialManager):
         )
 
         if login_result.returncode != 0:
-            error_msg = (
-                login_result.stderr.strip() if login_result.stderr else "Unknown error"
-            )
+            error_msg = login_result.stderr.strip() if login_result.stderr else "Unknown error"
             logger.error("Error logging in with API key: %s", error_msg)
-            raise InvalidCredentialsError(
-                "Invalid API credentials provided for Bitwarden"
-            )
+            raise InvalidCredentialsError("Invalid API credentials provided for Bitwarden")
 
         # After login, we need to unlock the vault to get a session key
         self.session_key = self._unlock_vault()
@@ -146,11 +143,7 @@ class BitwardenManager(CredentialManager):
         )
 
         if unlock_result.returncode != 0:
-            error_msg = (
-                unlock_result.stderr.strip()
-                if unlock_result.stderr
-                else "Unknown error"
-            )
+            error_msg = unlock_result.stderr.strip() if unlock_result.stderr else "Unknown error"
             logger.error("Error unlocking vault: %s", error_msg)
             raise BitwardenCLIError(f"Failed to unlock vault: {error_msg}")
 
@@ -241,12 +234,12 @@ class BitwardenManager(CredentialManager):
         :returns: The field value or None if not found
         :rtype: str or None
         """
-        login_data = secret.get('login', {})
+        login_data = secret.get("login", {})
         if login_data and field_name in login_data:
             return login_data[field_name]
 
-        for field in secret.get('fields', []):
-            if field.get('name') == field_name:
-                return field.get('value')
+        for field in secret.get("fields", []):
+            if field.get("name") == field_name:
+                return field.get("value")
 
         return None

@@ -1,5 +1,4 @@
 #!/usr/bin/env python3
-# -*- coding: utf-8 -*-
 #
 # Copyright (C) 2015-2020 Bitergia
 #
@@ -37,10 +36,12 @@ import dateutil.parser
 import dateutil.rrule
 import dateutil.tz
 
-
 __all__ = [
-    "InvalidDateError", "datetime_utcnow", "datetime_to_utc",
-    "str_to_datetime", "unixtime_to_datetime"
+    "InvalidDateError",
+    "datetime_to_utc",
+    "datetime_utcnow",
+    "str_to_datetime",
+    "unixtime_to_datetime",
 ]
 
 logger = logging.getLogger(__name__)
@@ -81,7 +82,7 @@ def datetime_to_utc(ts):
         instance of datetime
     """
     if not isinstance(ts, datetime.datetime):
-        msg = '<%s> object' % type(ts)
+        msg = "<%s> object" % type(ts)
         raise InvalidDateError(date=msg)
 
     if not ts.tzinfo:
@@ -112,6 +113,7 @@ def str_to_datetime(ts):
     :raises IvalidDateError: when the given string cannot be converted
         on a valid date
     """
+
     def parse_datetime(ts):
         dt = dateutil.parser.parse(ts)
         if not dt.tzinfo:
@@ -128,7 +130,7 @@ def str_to_datetime(ts):
         # or in 'Thu, 14 Aug 2008 02:07:59 +0200 CEST'.
         m = re.search(r"^.+?\s+[\+\-\d]\d{4}(\s+.+)$", ts)
         if m:
-            ts = ts[:m.start(1)]
+            ts = ts[: m.start(1)]
 
         try:
             dt = parse_datetime(ts)
@@ -139,8 +141,10 @@ def str_to_datetime(ts):
 
             if m:
                 dt = parse_datetime(m.group(1))
-                logger.warning("Date %s does not have a valid timezone. "
-                               "Date converted removing timezone info", ts)
+                logger.warning(
+                    "Date %s does not have a valid timezone. Date converted removing timezone info",
+                    ts,
+                )
                 return dt
 
             raise e
@@ -151,13 +155,16 @@ def str_to_datetime(ts):
             # date to UTC and remove the timezone info.
             _ = dt.astimezone(dateutil.tz.tzutc())
         except ValueError:
-            logger.warning("Date %s does not have a valid timezone; timedelta not in range. "
-                           "Date converted to UTC removing timezone info", ts)
+            logger.warning(
+                "Date %s does not have a valid timezone; timedelta not in range. "
+                "Date converted to UTC removing timezone info",
+                ts,
+            )
             dt = dt.replace(tzinfo=dateutil.tz.tzutc()).astimezone(dateutil.tz.tzutc())
 
         return dt
 
-    except ValueError as e:
+    except ValueError:
         raise InvalidDateError(date=str(ts))
 
 

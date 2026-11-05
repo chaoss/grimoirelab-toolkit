@@ -1,4 +1,3 @@
-# -*- coding: utf-8 -*-
 #
 # Copyright (C) Grimoirelab Contributors
 #
@@ -21,11 +20,11 @@ from unittest.mock import patch
 
 import hvac.exceptions
 
-from grimoirelab_toolkit.credential_manager.hc_manager import HashicorpManager
 from grimoirelab_toolkit.credential_manager.exceptions import (
     CredentialNotFoundError,
     HashicorpVaultError,
 )
+from grimoirelab_toolkit.credential_manager.hc_manager import HashicorpManager
 
 
 class TestHashicorpManager(unittest.TestCase):
@@ -101,9 +100,7 @@ class TestHashicorpManager(unittest.TestCase):
         self.assertIsInstance(result, dict)
         self.assertEqual(result, self.mock_secret_response)
         self.assertEqual(result["data"]["data"]["api_key"], "test_key")
-        mock_instance.secrets.kv.read_secret.assert_called_once_with(
-            path="test_service"
-        )
+        mock_instance.secrets.kv.read_secret.assert_called_once_with(path="test_service")
 
     @patch("hvac.Client")
     def test_get_secret_not_found(self, mock_hvac_client):
