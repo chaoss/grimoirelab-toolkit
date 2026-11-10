@@ -78,7 +78,3 @@ class TestURIJoin(unittest.TestCase):
 
         url = urijoin(base_uri, path0)
         self.assertEqual(url, "file:///tmp/repository")
-
-
-if __name__ == "__main__":
-    unittest.main(warnings="ignore")

@@ -223,7 +223,3 @@ class TestUnixTimeToDatetime(unittest.TestCase):
         self.assertRaises(InvalidDateError, str_to_datetime, "nodate")
         self.assertRaises(InvalidDateError, str_to_datetime, None)
         self.assertRaises(InvalidDateError, str_to_datetime, "")
-
-
-if __name__ == "__main__":
-    unittest.main(warnings="ignore")

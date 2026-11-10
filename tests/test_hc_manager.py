@@ -173,7 +173,3 @@ class TestHashicorpManager(unittest.TestCase):
         result = manager.extract_field({}, "username")
 
         self.assertIsNone(result)
-
-
-if __name__ == "__main__":
-    unittest.main(warnings="ignore")

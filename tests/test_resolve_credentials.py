@@ -237,7 +237,3 @@ class TestResolveCredentialsGeneral(unittest.TestCase):
         manager = self._make_stub_manager()
         result = manager.resolve_credentials("item", [])
         self.assertEqual(result, {})
-
-
-if __name__ == "__main__":
-    unittest.main()

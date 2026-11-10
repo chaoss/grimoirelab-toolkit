@@ -206,7 +206,3 @@ class TestFindObjectProperties(unittest.TestCase):
 
         properties = find_class_properties(NoPropertiesClass())
         self.assertEqual(len(properties), 0)
-
-
-if __name__ == "__main__":
-    unittest.main(warnings="ignore")
