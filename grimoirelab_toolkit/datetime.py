@@ -1,4 +1,3 @@
-#!/usr/bin/env python3
 #
 # Copyright (C) 2015-2020 Bitergia
 #
@@ -82,7 +81,7 @@ def datetime_to_utc(ts):
         instance of datetime
     """
     if not isinstance(ts, datetime.datetime):
-        msg = "<%s> object" % type(ts)
+        msg = f"<{type(ts)!s}> object"
         raise InvalidDateError(date=msg)
 
     if not ts.tzinfo:
@@ -134,7 +133,7 @@ def str_to_datetime(ts):
 
         try:
             dt = parse_datetime(ts)
-        except ValueError as e:
+        except ValueError:
             # Try to remove the timezone, usually it causes
             # problems.
             m = re.search(r"^(.+?)\s+[\+\-\d]\d{4}.*$", ts)
@@ -147,7 +146,7 @@ def str_to_datetime(ts):
                 )
                 return dt
 
-            raise e
+            raise
 
         try:
             # Check that the offset is between -timedelta(hours=24) and

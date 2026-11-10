@@ -1,4 +1,3 @@
-#!/usr/bin/env python3
 #
 # Copyright (C) 2015-2020 Bitergia
 #
@@ -83,7 +82,7 @@ def find_signature_parameters(callable_, candidates, excluded=("self", "cls")):
         elif name in candidates:
             exec_params[name] = candidates[name]
         elif param.default == inspect.Parameter.empty:
-            msg = "required argument %s not found" % name
+            msg = f"required argument {name!s} not found"
             raise AttributeError(msg, name)
         else:
             continue
