@@ -66,8 +66,6 @@ class TestHashicorpManager(unittest.TestCase):
     def test_initialization_success(self, mock_hvac_client):
         """Test successful initialization with valid credentials."""
 
-        mock_instance = mock_hvac_client.return_value
-
         manager = HashicorpManager(self.vault_url, self.token, self.certificate)
 
         self.assertIsNotNone(manager.client)

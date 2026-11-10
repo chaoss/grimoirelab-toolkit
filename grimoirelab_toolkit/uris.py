@@ -38,4 +38,4 @@ def urijoin(*args):
 
     :returns: a URI string
     """
-    return "/".join(map(lambda x: str(x).strip("/"), args))
+    return "/".join(str(x).strip("/") for x in args)

@@ -44,7 +44,7 @@ class HashicorpManager(CredentialManager):
     included, so the user can choose to store it and retrieve desired data.
     """
 
-    def __init__(self, vault_url: str, token: str, certificate: str | bool = None):
+    def __init__(self, vault_url: str, token: str, certificate: str | bool | None = None):
         """
         Creates HashicorpManager object using token authentication
 
@@ -88,7 +88,7 @@ class HashicorpManager(CredentialManager):
             raise CredentialNotFoundError(f"Secret path '{item_name}' not found in Vault")
         except Exception as e:
             logger.error("Error retrieving the secret: %s", str(e))
-            raise HashicorpVaultError(f"Vault operation failed: {e}")
+            raise HashicorpVaultError(f"Vault operation failed: {e}") from e
 
     def extract_field(self, secret: dict, field_name: str) -> str | None:
         """Extract a field value from a HashiCorp Vault secret.

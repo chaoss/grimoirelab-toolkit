@@ -184,5 +184,5 @@ def unixtime_to_datetime(ut):
         dt = datetime.datetime.fromtimestamp(ut, datetime.timezone.utc)
         dt = dt.replace(tzinfo=dateutil.tz.tzutc())
         return dt
-    except Exception:
-        raise InvalidDateError(date=str(ut))
+    except Exception as e:
+        raise InvalidDateError(date=str(ut)) from e

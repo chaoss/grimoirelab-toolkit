@@ -221,7 +221,7 @@ class TestBitwardenManager(unittest.TestCase):
 
         # Verify logout was called
         logout_call = call(
-            ["/usr/bin/bw", "logout"], capture_output=True, text=True, env=manager.env
+            ["/usr/bin/bw", "logout"], capture_output=True, text=True, env=manager.env, check=False
         )
         self.assertIn(logout_call, mock_run.call_args_list)
 

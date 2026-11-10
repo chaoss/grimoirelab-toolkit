@@ -108,6 +108,7 @@ class BitwardenManager(CredentialManager):
         # Log in using API key
         login_result = subprocess.run(
             [self.bw_path, "login", "--apikey"],
+            check=False,
             input=f"{self.client_id}\n{self.client_secret}\n",
             capture_output=True,
             text=True,
@@ -136,6 +137,7 @@ class BitwardenManager(CredentialManager):
         # this uses the master password to unlock the vault
         unlock_result = subprocess.run(
             [self.bw_path, "unlock", "--raw"],
+            check=False,
             input=f"{self.master_password}\n",
             capture_output=True,
             text=True,
@@ -177,6 +179,7 @@ class BitwardenManager(CredentialManager):
         # Pass session key via command line parameter
         result = subprocess.run(
             [self.bw_path, "get", "item", item_name, "--session", self.session_key],
+            check=False,
             capture_output=True,
             text=True,
             env=self.env,
@@ -206,6 +209,7 @@ class BitwardenManager(CredentialManager):
         # Execute logout command
         result = subprocess.run(
             [self.bw_path, "logout"],
+            check=False,
             capture_output=True,
             text=True,
             env=self.env,
