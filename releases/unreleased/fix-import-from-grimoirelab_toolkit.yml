@@ -1,0 +1,10 @@
+---
+title: Fix import from grimoirelab_toolkit
+category: fixed
+author: Miguel Ángel Fernández Sánchez <miguelangel.fsanchez@urjc.es>
+issue: 
+notes: >
+    The import `from grimoirelab_toolkit import *`
+    failed with a `ModuleNotFoundError` because the
+    variable `__all__` contained the version number
+    instead of the `__version__` name.
