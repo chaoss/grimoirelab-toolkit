@@ -1,4 +1,3 @@
-# -*- coding: utf-8 -*-
 #
 # Copyright (C) Grimoirelab Contributors
 #
@@ -58,11 +57,9 @@ class CredentialManager:
 
     def login(self):
         """Log into the secrets manager. No-op by default."""
-        pass
 
     def logout(self):
         """Log out from the secrets manager. No-op by default."""
-        pass
 
     def resolve_credentials(
         self,
@@ -98,7 +95,8 @@ class CredentialManager:
                 if value is None:
                     logger.warning(
                         "Field '%s' not found in secret '%s'",
-                        field_name, secret_name,
+                        field_name,
+                        secret_name,
                     )
                     continue
                 result[field_name] = value

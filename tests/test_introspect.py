@@ -1,5 +1,3 @@
-#!/usr/bin/env python3
-# -*- coding: utf-8 -*-
 #
 # Copyright (C) 2015-2020 Bitergia
 #
@@ -25,9 +23,11 @@
 
 import unittest
 
-from grimoirelab_toolkit.introspect import (inspect_signature_parameters,
-                                            find_signature_parameters,
-                                            find_class_properties)
+from grimoirelab_toolkit.introspect import (
+    find_class_properties,
+    find_signature_parameters,
+    inspect_signature_parameters,
+)
 
 
 class FakeCallable:
@@ -57,27 +57,27 @@ class TestInspectSignatureParameters(unittest.TestCase):
     def test_inspect(self):
         """Check the parameters from a callable."""
 
-        expected = ['args', 'kwargs']
+        expected = ["args", "kwargs"]
         params = inspect_signature_parameters(FakeCallable)
         params = [p.name for p in params]
         self.assertListEqual(params, expected)
 
-        expected = ['self', 'args', 'kwargs']
+        expected = ["self", "args", "kwargs"]
         params = inspect_signature_parameters(FakeCallable.__init__)
         params = [p.name for p in params]
         self.assertListEqual(params, expected)
 
-        expected = ['self', 'a', 'b', 'c']
+        expected = ["self", "a", "b", "c"]
         params = inspect_signature_parameters(FakeCallable.test)
         params = [p.name for p in params]
         self.assertListEqual(params, expected)
 
-        expected = ['a', 'b']
+        expected = ["a", "b"]
         params = inspect_signature_parameters(FakeCallable.class_test)
         params = [p.name for p in params]
         self.assertListEqual(params, expected)
 
-        expected = ['a', 'b']
+        expected = ["a", "b"]
         params = inspect_signature_parameters(FakeCallable.static_test)
         params = [p.name for p in params]
         self.assertListEqual(params, expected)
@@ -85,29 +85,25 @@ class TestInspectSignatureParameters(unittest.TestCase):
     def test_inspect_excluding_parameters(self):
         """Check the parameters from a callable when some are excluded."""
 
-        excluded = ['self', 'cls', 'a']
+        excluded = ["self", "cls", "a"]
 
-        expected = ['args', 'kwargs']
-        params = inspect_signature_parameters(FakeCallable,
-                                              excluded=excluded)
+        expected = ["args", "kwargs"]
+        params = inspect_signature_parameters(FakeCallable, excluded=excluded)
         params = [p.name for p in params]
         self.assertListEqual(params, expected)
 
-        expected = ['b', 'c']
-        params = inspect_signature_parameters(FakeCallable.test,
-                                              excluded=excluded)
+        expected = ["b", "c"]
+        params = inspect_signature_parameters(FakeCallable.test, excluded=excluded)
         params = [p.name for p in params]
         self.assertListEqual(params, expected)
 
-        expected = ['b']
-        params = inspect_signature_parameters(FakeCallable.class_test,
-                                              excluded=excluded)
+        expected = ["b"]
+        params = inspect_signature_parameters(FakeCallable.class_test, excluded=excluded)
         params = [p.name for p in params]
         self.assertListEqual(params, expected)
 
-        expected = ['b']
-        params = inspect_signature_parameters(FakeCallable.static_test,
-                                              excluded=excluded)
+        expected = ["b"]
+        params = inspect_signature_parameters(FakeCallable.static_test, excluded=excluded)
         params = [p.name for p in params]
         self.assertListEqual(params, expected)
 
@@ -118,44 +114,43 @@ class TestFindSignatureParameters(unittest.TestCase):
     def test_find_parameters(self):
         """Test if a list of parameters is generated."""
 
-        expected = {'a': 1, 'b': 2, 'c': 3}
-        params = {'a': 1, 'b': 2, 'c': 3}
+        expected = {"a": 1, "b": 2, "c": 3}
+        params = {"a": 1, "b": 2, "c": 3}
         found = find_signature_parameters(FakeCallable.test, params)
         self.assertDictEqual(found, expected)
 
-        expected = {'a': 1, 'b': 2, 'c': 3}
-        params = {'a': 1, 'b': 2, 'c': 3, 'd': 4}
+        expected = {"a": 1, "b": 2, "c": 3}
+        params = {"a": 1, "b": 2, "c": 3, "d": 4}
         found = find_signature_parameters(FakeCallable.test, params)
         self.assertDictEqual(found, expected)
 
-        expected = {'a': 1, 'b': 2}
-        params = {'a': 1, 'b': 2, 'd': 3}
+        expected = {"a": 1, "b": 2}
+        params = {"a": 1, "b": 2, "d": 3}
         found = find_signature_parameters(FakeCallable.test, params)
         self.assertDictEqual(found, expected)
 
-        expected = {'a': 1, 'b': 2}
-        params = {'a': 1, 'b': 2}
+        expected = {"a": 1, "b": 2}
+        params = {"a": 1, "b": 2}
         found = find_signature_parameters(FakeCallable.test_args, params)
         self.assertDictEqual(found, expected)
 
     def test_find_excluding_parameters(self):
         """Test if a list of parameters is generated excluding some."""
 
-        expected = {'b': 2, 'c': 3}
-        params = {'a': 1, 'b': 2, 'c': 3}
-        excluded = ('self', 'a')
-        found = find_signature_parameters(FakeCallable.test, params,
-                                          excluded=excluded)
+        expected = {"b": 2, "c": 3}
+        params = {"a": 1, "b": 2, "c": 3}
+        excluded = ("self", "a")
+        found = find_signature_parameters(FakeCallable.test, params, excluded=excluded)
         self.assertDictEqual(found, expected)
 
     def test_attribute_error(self):
         """Test if it raises an exception for not found parameters."""
 
         with self.assertRaises(AttributeError) as e:
-            params = {'a': 1, 'd': 3}
+            params = {"a": 1, "d": 3}
             _ = find_signature_parameters(FakeCallable.test, params)
 
-        self.assertEqual(e.exception.args[1], 'b')
+        self.assertEqual(e.exception.args[1], "b")
 
 
 class PropertiesClass:
@@ -198,11 +193,11 @@ class TestFindObjectProperties(unittest.TestCase):
         self.assertEqual(len(properties), 2)
 
         p = properties[0]
-        self.assertEqual(p[0], 'my_property')
+        self.assertEqual(p[0], "my_property")
         self.assertIsInstance(p[1], property)
 
         p = properties[1]
-        self.assertEqual(p[0], 'readonly_property')
+        self.assertEqual(p[0], "readonly_property")
         self.assertIsInstance(p[1], property)
 
     def test_find_no_properties(self):
@@ -210,7 +205,3 @@ class TestFindObjectProperties(unittest.TestCase):
 
         properties = find_class_properties(NoPropertiesClass())
         self.assertEqual(len(properties), 0)
-
-
-if __name__ == "__main__":
-    unittest.main(warnings='ignore')

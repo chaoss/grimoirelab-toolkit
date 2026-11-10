@@ -1,5 +1,3 @@
-#!/usr/bin/env python3
-# -*- coding: utf-8 -*-
 #
 # Copyright (C) Grimoirelab developers
 #
@@ -38,12 +36,11 @@ def unaccent_string(unistr):
     :returns: Unicode string on its canonical form
     """
     if not isinstance(unistr, str):
-        msg = "argument must be a string; {} given".format(unistr.__class__.__name__)
+        msg = f"argument must be a string; {unistr.__class__.__name__} given"
         raise TypeError(msg)
 
-    cs = [c for c in unicodedata.normalize('NFD', unistr)
-          if unicodedata.category(c) != 'Mn']
-    string = ''.join(cs)
+    cs = [c for c in unicodedata.normalize("NFD", unistr) if unicodedata.category(c) != "Mn"]
+    string = "".join(cs)
 
     return string
 
@@ -79,6 +76,7 @@ def generate_uuid(source, email=None, name=None, username=None):
     :raises ValueError: when source is `None` or empty; each one
         of the parameters is `None`; or the parameters are empty.
     """
+
     def to_str(value, unaccent=False):
         s = str(value)
         if unaccent:
@@ -88,16 +86,15 @@ def generate_uuid(source, email=None, name=None, username=None):
 
     if source is None:
         raise ValueError("'source' cannot be None")
-    if source == '':
+    if source == "":
         raise ValueError("'source' cannot be an empty string")
     if not (email or name or username):
         raise ValueError("identity data cannot be empty")
 
-    s = ':'.join((to_str(source),
-                  to_str(email),
-                  to_str(name, unaccent=True),
-                  to_str(username))).lower()
-    s = s.encode('UTF-8', errors="surrogateescape")
+    s = ":".join(
+        (to_str(source), to_str(email), to_str(name, unaccent=True), to_str(username))
+    ).lower()
+    s = s.encode("UTF-8", errors="surrogateescape")
 
     sha1 = hashlib.sha1(s)
     uuid_ = sha1.hexdigest()

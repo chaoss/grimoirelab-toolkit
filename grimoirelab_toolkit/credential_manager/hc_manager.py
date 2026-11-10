@@ -1,4 +1,3 @@
-# -*- coding: utf-8 -*-
 #
 # Copyright (C) Grimoirelab Contributors
 #
@@ -22,7 +21,7 @@ import hvac
 import hvac.exceptions
 
 from .credential_manager import CredentialManager
-from .exceptions import HashicorpVaultError, CredentialNotFoundError
+from .exceptions import CredentialNotFoundError, HashicorpVaultError
 
 logger = logging.getLogger(__name__)
 
@@ -45,7 +44,7 @@ class HashicorpManager(CredentialManager):
     included, so the user can choose to store it and retrieve desired data.
     """
 
-    def __init__(self, vault_url: str, token: str, certificate: str | bool = None):
+    def __init__(self, vault_url: str, token: str, certificate: str | bool | None = None):
         """
         Creates HashicorpManager object using token authentication
 
@@ -86,12 +85,10 @@ class HashicorpManager(CredentialManager):
             return secret
         except hvac.exceptions.InvalidPath:
             logger.error("The path %s does not exist in the vault", item_name)
-            raise CredentialNotFoundError(
-                f"Secret path '{item_name}' not found in Vault"
-            )
+            raise CredentialNotFoundError(f"Secret path '{item_name}' not found in Vault")
         except Exception as e:
             logger.error("Error retrieving the secret: %s", str(e))
-            raise HashicorpVaultError(f"Vault operation failed: {e}")
+            raise HashicorpVaultError(f"Vault operation failed: {e}") from e
 
     def extract_field(self, secret: dict, field_name: str) -> str | None:
         """Extract a field value from a HashiCorp Vault secret.
@@ -104,5 +101,5 @@ class HashicorpManager(CredentialManager):
         :returns: The field value or None if not found
         :rtype: str or None
         """
-        secret_data = secret.get('data', {}).get('data', {})
+        secret_data = secret.get("data", {}).get("data", {})
         return secret_data.get(field_name)

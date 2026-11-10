@@ -1,4 +1,3 @@
-# -*- coding: utf-8 -*-
 #
 # Copyright (C) Grimoirelab Contributors
 #
@@ -20,13 +19,13 @@
 #
 
 import unittest
-from unittest.mock import patch, MagicMock, call
+from unittest.mock import MagicMock, call, patch
 
 from grimoirelab_toolkit.credential_manager.bw_manager import BitwardenManager
 from grimoirelab_toolkit.credential_manager.exceptions import (
-    InvalidCredentialsError,
     BitwardenCLIError,
     CredentialNotFoundError,
+    InvalidCredentialsError,
 )
 
 
@@ -47,9 +46,7 @@ class TestBitwardenManager(unittest.TestCase):
 
         mock_which.return_value = "/usr/bin/bw"
 
-        manager = BitwardenManager(
-            self.client_id, self.client_secret, self.master_password
-        )
+        manager = BitwardenManager(self.client_id, self.client_secret, self.master_password)
 
         self.assertEqual(manager.client_id, self.client_id)
         self.assertEqual(manager.client_secret, self.client_secret)
@@ -81,9 +78,7 @@ class TestBitwardenManager(unittest.TestCase):
             MagicMock(returncode=0, stdout="test_session_key\n", stderr=""),  # unlock
         ]
 
-        manager = BitwardenManager(
-            self.client_id, self.client_secret, self.master_password
-        )
+        manager = BitwardenManager(self.client_id, self.client_secret, self.master_password)
         session_key = manager.login()
 
         self.assertEqual(session_key, "test_session_key")
@@ -98,9 +93,7 @@ class TestBitwardenManager(unittest.TestCase):
         mock_which.return_value = "/usr/bin/bw"
         mock_run.return_value = MagicMock(returncode=1, stderr="Invalid credentials")
 
-        manager = BitwardenManager(
-            self.client_id, self.client_secret, self.master_password
-        )
+        manager = BitwardenManager(self.client_id, self.client_secret, self.master_password)
 
         with self.assertRaises(InvalidCredentialsError):
             manager.login()
@@ -116,9 +109,7 @@ class TestBitwardenManager(unittest.TestCase):
             MagicMock(returncode=1, stderr="Unlock failed", stdout=""),  # unlock
         ]
 
-        manager = BitwardenManager(
-            self.client_id, self.client_secret, self.master_password
-        )
+        manager = BitwardenManager(self.client_id, self.client_secret, self.master_password)
 
         with self.assertRaises(BitwardenCLIError) as context:
             manager.login()
@@ -136,9 +127,7 @@ class TestBitwardenManager(unittest.TestCase):
         )
         mock_run.return_value = secret_result
 
-        manager = BitwardenManager(
-            self.client_id, self.client_secret, self.master_password
-        )
+        manager = BitwardenManager(self.client_id, self.client_secret, self.master_password)
         manager.session_key = self.session_key
         result = manager.get_secret("github")
 
@@ -166,9 +155,7 @@ class TestBitwardenManager(unittest.TestCase):
         secret_result = MagicMock(returncode=0, stdout='{"data":"value"}', stderr="")
         mock_run.return_value = secret_result
 
-        manager = BitwardenManager(
-            self.client_id, self.client_secret, self.master_password
-        )
+        manager = BitwardenManager(self.client_id, self.client_secret, self.master_password)
         manager.session_key = self.session_key
         result = manager.get_secret("my_item")
 
@@ -185,9 +172,7 @@ class TestBitwardenManager(unittest.TestCase):
         secret_result = MagicMock(returncode=1, stderr="Not found")
         mock_run.return_value = secret_result
 
-        manager = BitwardenManager(
-            self.client_id, self.client_secret, self.master_password
-        )
+        manager = BitwardenManager(self.client_id, self.client_secret, self.master_password)
         manager.session_key = self.session_key
 
         with self.assertRaises(CredentialNotFoundError) as context:
@@ -204,9 +189,7 @@ class TestBitwardenManager(unittest.TestCase):
         secret_result = MagicMock(returncode=0, stdout="not valid json")
         mock_run.return_value = secret_result
 
-        manager = BitwardenManager(
-            self.client_id, self.client_secret, self.master_password
-        )
+        manager = BitwardenManager(self.client_id, self.client_secret, self.master_password)
         manager.session_key = self.session_key
 
         with self.assertRaises(BitwardenCLIError) as context:
@@ -226,9 +209,7 @@ class TestBitwardenManager(unittest.TestCase):
             MagicMock(returncode=0, stdout="You have logged out."),  # logout
         ]
 
-        manager = BitwardenManager(
-            self.client_id, self.client_secret, self.master_password
-        )
+        manager = BitwardenManager(self.client_id, self.client_secret, self.master_password)
         manager.login()
 
         self.assertEqual(manager.session_key, "test_session_key")
@@ -240,7 +221,7 @@ class TestBitwardenManager(unittest.TestCase):
 
         # Verify logout was called
         logout_call = call(
-            ["/usr/bin/bw", "logout"], capture_output=True, text=True, env=manager.env
+            ["/usr/bin/bw", "logout"], capture_output=True, text=True, env=manager.env, check=False
         )
         self.assertIn(logout_call, mock_run.call_args_list)
 
@@ -256,9 +237,7 @@ class TestBitwardenManager(unittest.TestCase):
             MagicMock(returncode=1, stderr="Logout failed"),  # logout
         ]
 
-        manager = BitwardenManager(
-            self.client_id, self.client_secret, self.master_password
-        )
+        manager = BitwardenManager(self.client_id, self.client_secret, self.master_password)
         manager.login()
         manager.logout()
 

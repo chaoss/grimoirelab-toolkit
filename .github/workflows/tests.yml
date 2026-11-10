@@ -30,9 +30,12 @@ jobs:
       - name: Install dependencies
         run: |
           poetry install -vvv -E hashicorp-manager
-      - name: Lint with flake8
+      - name: Lint files
         run: |
-          poetry run flake8
+          poetry run ruff check --output-format=github
+      - name: Check format
+        run: |
+          poetry run ruff format --diff
       - name: Tests and Coverage
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
