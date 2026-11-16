@@ -54,9 +54,13 @@ a project isolated environment using:
 ```
 $ poetry install
 ```
-To spaw a new shell within the virtual environment use:
+To spawn a new shell within the virtual environment use:
 ```
 $ poetry shell
+```
+In Poetry 2, use:
+```
+$ eval $(poetry env activate)
 ```
 
 ## Credential Manager Library
