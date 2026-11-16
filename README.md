@@ -8,7 +8,7 @@ URIs/URLs, among other topics.
 
 ## Requirements
 
- * Python >= 3.8
+ * Python >= 3.11
 
 You will also need some other libraries for running the tool, you can find the
 whole list of dependencies in [pyproject.toml](pyproject.toml) file.
