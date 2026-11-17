@@ -54,9 +54,13 @@ a project isolated environment using:
 ```
 $ poetry install
 ```
-To spaw a new shell within the virtual environment use:
+To spawn a new shell within the virtual environment use:
 ```
 $ poetry shell
+```
+In Poetry 2, use:
+```
+$ eval $(poetry env activate)
 ```
 
 ## Credential Manager Library
@@ -190,8 +194,8 @@ The module uses the [Bitwarden CLI](https://bitwarden.com/help/cli/) to interact
 
 This module uses hvac library, which is set as optional module in pyproject.toml.
 
- 1. Normal install: poetry install --with hashicorp-manager
- 2. For development: poetry install --with hashicorp-manager --with dev
+ 1. From PyPI (pip): pip install "grimoirelab-toolkit[hashicorp-manager]"
+ 2. From the repository, for development (Poetry): poetry install -E hashicorp-manager
 
 
 #### Example use
@@ -324,7 +328,7 @@ normalizes the extraction via each manager's `extract_field()` implementation:
 ### Optional dependencies
 
 - **Bitwarden**: requires `bw` CLI on `PATH` (no Python package needed)
-- **HashiCorp**: requires `hvac` (`poetry install --with hashicorp-manager`)
+- **HashiCorp**: requires `hvac` (`poetry install -E hashicorp-manager`)
 
 ## License
 
