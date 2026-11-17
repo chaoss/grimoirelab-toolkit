@@ -62,7 +62,7 @@ class InvalidDateError(Exception):
 def datetime_utcnow():
     """Handy function which returns the current date and time in UTC."""
 
-    return datetime.datetime.now(datetime.timezone.utc)
+    return datetime.datetime.now(datetime.UTC)
 
 
 def datetime_to_utc(ts):
@@ -181,7 +181,7 @@ def unixtime_to_datetime(ut):
         converted into a valid date
     """
     try:
-        dt = datetime.datetime.fromtimestamp(ut, datetime.timezone.utc)
+        dt = datetime.datetime.fromtimestamp(ut, datetime.UTC)
         dt = dt.replace(tzinfo=dateutil.tz.tzutc())
         return dt
     except Exception as e:
