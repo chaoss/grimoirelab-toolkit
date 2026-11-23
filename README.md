@@ -338,6 +338,87 @@ normalizes the extraction via each manager's `extract_field()` implementation:
 - Individual missing fields are skipped with a warning (no error)
 - `logout()` is always called in a `finally` block
 
+### Creating a credential manager by its name
+
+Applications can support every credential manager without knowing
+the details of each one. `available_managers()` returns a dict with a
+description (`ManagerSpec`) of each manager, indexed by its name and
+including its configuration parameters (`ManagerParameter`).
+`create_credential_manager()` creates a manager
+by its name, using the names of these parameters as keyword arguments.
+
+```python
+from grimoirelab_toolkit.credential_manager import (
+    available_managers,
+    create_credential_manager,
+)
+
+for name, spec in available_managers().items():
+    print(name, [param.name for param in spec.parameters])
+# bitwarden ['client_id', 'client_secret', 'master_password']
+# hashicorp ['url', 'token', 'certificate', 'mount_point']
+
+manager = create_credential_manager(
+    "hashicorp",
+    url="https://vault.example.com",
+    token="hvs.your-token",
+    mount_point="grimoirelab",
+)
+credentials = manager.resolve_credentials("github", ["api_token"])
+```
+
+Each `ManagerSpec` has:
+
+- `name` — Identifier of the manager, used by `create_credential_manager()`
+- `title` — Human readable name of the manager
+- `prefix` — Short prefix that applications can use to name the parameters
+  of the manager, e.g. `--vault-url` or `MYAPP_VAULT_URL`
+- `parameters` — Configuration parameters. Each one has a `name`, a `help`
+  text, the flags `required` and `secret`, and a `default` value. Values of
+  secret parameters, like tokens or passwords, must not be logged or displayed.
+- `manager_class` — Class that implements the manager
+- `extra` — Package extra that installs the dependencies of the manager
+
+#### Adding a credential manager
+
+The descriptions are obtained by introspection. Any subclass of
+`CredentialManager` that sets its own `NAME` is available, even when it is
+defined outside the toolkit. The name is not inherited, so a subclass of an
+available manager must set its own, and it must be unique among all managers;
+otherwise, `available_managers()` raises `CredentialManagerError`. The
+configuration parameters of a manager are the parameters of its
+constructor, annotated with their descriptions. Parameters without a default
+value are required, and `Secret` marks those with sensitive values:
+
+```python
+from typing import Annotated
+
+from grimoirelab_toolkit.credential_manager import CredentialManager, Secret
+
+
+class KeePassManager(CredentialManager):
+    NAME = "keepass"
+    TITLE = "KeePass"
+    PREFIX = "keepass"
+
+    def __init__(
+        self,
+        database: Annotated[str, "Path to the KeePass database"],
+        password: Annotated[str, Secret("Password of the database")],
+        timeout: Annotated[int, "Timeout in seconds"] = 30,
+    ): ...
+```
+
+Parameters with `None` or empty values are considered as not given, so
+the values of optional parameters can be passed directly from any source
+(e.g. command line arguments or environment variables).
+
+`create_credential_manager()` raises `ValueError` when the manager is
+unknown, a required parameter is missing, or a parameter is not supported
+by the manager. It raises `CredentialManagerError` when the dependencies of
+the manager are not installed. Managers are described even when their
+dependencies are missing.
+
 ### Optional dependencies
 
 - **Bitwarden**: requires `bw` CLI on `PATH` (no Python package needed)

@@ -16,12 +16,18 @@
 #
 
 import logging
+from typing import Annotated
 
-import hvac
-import hvac.exceptions
+# hvac is an optional dependency. The manager can be described
+# without it, but it can't be created (see 'HashicorpManager')
+try:
+    import hvac
+    import hvac.exceptions
+except ImportError:
+    hvac = None
 
-from .credential_manager import CredentialManager
-from .exceptions import CredentialNotFoundError, HashicorpVaultError
+from .credential_manager import CredentialManager, Secret
+from .exceptions import CredentialManagerError, CredentialNotFoundError, HashicorpVaultError
 
 logger = logging.getLogger(__name__)
 
@@ -34,11 +40,11 @@ class HashicorpManager(CredentialManager):
     This class defines functions to initialize a client and retrieve
     secrets from HashiCorp Vault. The workflow is:
 
-    manager = HashicorpManager(vault_url, token, certificate)
+    manager = HashicorpManager(url, token, certificate)
     manager.get_secret("github")
     manager.get_secret("elasticsearch")
 
-    The manager initializes the client using the vault_url, token,
+    The manager initializes the client using the url, token,
     and certificate given as arguments when creating the instance,
     so the object is reusable along the program.
 
@@ -46,17 +52,26 @@ class HashicorpManager(CredentialManager):
     included, so the user can choose to store it and retrieve desired data.
     """
 
+    NAME = "hashicorp"
+    TITLE = "HashiCorp Vault"
+    PREFIX = "vault"
+    EXTRA = "hashicorp-manager"
+
     def __init__(
         self,
-        vault_url: str,
-        token: str,
-        certificate: str | bool | None = None,
-        mount_point: str = DEFAULT_MOUNT_POINT,
+        url: Annotated[str, "HashiCorp Vault URL"],
+        token: Annotated[str, Secret("HashiCorp Vault authentication token")],
+        certificate: Annotated[
+            str | bool | None, "Path to CA certificate for HashiCorp Vault TLS verification"
+        ] = None,
+        mount_point: Annotated[
+            str, "Path where the KV version 2 secrets engine is mounted"
+        ] = DEFAULT_MOUNT_POINT,
     ):
         """
         Creates HashicorpManager object using token authentication
 
-        :param str vault_url: The URL of the vault
+        :param str url: The URL of the vault
         :param str token: The access token for authentication
         :param Union[str, bool, None] certificate: TLS verification setting. Either a boolean to indicate whether TLS
             verification should be performed, a string pointing at the CA bundle to use for
@@ -64,9 +79,16 @@ class HashicorpManager(CredentialManager):
         :param str mount_point: Path where the KV version 2 secrets engine is mounted.
             Secrets are read relative to this path.
 
+        :raises CredentialManagerError: when hvac is not installed
         """
+        if hvac is None:
+            raise CredentialManagerError(
+                f"'{self.NAME}' credential manager is not available; "
+                f"install it with 'grimoirelab-toolkit[{self.EXTRA}]'"
+            )
+
         logger.debug("Creating Vault client")
-        self.client = hvac.Client(url=vault_url, token=token, verify=certificate)
+        self.client = hvac.Client(url=url, token=token, verify=certificate)
         self.mount_point = mount_point
         logger.debug("Vault client initialized successfully")
 
