@@ -69,9 +69,20 @@ class TestHashicorpManager(unittest.TestCase):
         manager = HashicorpManager(self.vault_url, self.token, self.certificate)
 
         self.assertIsNotNone(manager.client)
+        self.assertEqual(manager.mount_point, "secret")
         mock_hvac_client.assert_called_once_with(
             url=self.vault_url, token=self.token, verify=self.certificate
         )
+
+    @patch("hvac.Client")
+    def test_initialization_mount_point(self, mock_hvac_client):
+        """Test initialization with a custom mount point."""
+
+        manager = HashicorpManager(
+            self.vault_url, self.token, self.certificate, mount_point="grimoirelab"
+        )
+
+        self.assertEqual(manager.mount_point, "grimoirelab")
 
     @patch("hvac.Client")
     def test_initialization_failure(self, mock_hvac_client):
@@ -98,7 +109,26 @@ class TestHashicorpManager(unittest.TestCase):
         self.assertIsInstance(result, dict)
         self.assertEqual(result, self.mock_secret_response)
         self.assertEqual(result["data"]["data"]["api_key"], "test_key")
-        mock_instance.secrets.kv.read_secret.assert_called_once_with(path="test_service")
+        mock_instance.secrets.kv.read_secret.assert_called_once_with(
+            path="test_service", mount_point="secret"
+        )
+
+    @patch("hvac.Client")
+    def test_get_secret_mount_point(self, mock_hvac_client):
+        """Test whether secrets are read from the given mount point."""
+
+        mock_instance = mock_hvac_client.return_value
+        mock_instance.secrets.kv.read_secret.return_value = self.mock_secret_response
+
+        manager = HashicorpManager(
+            self.vault_url, self.token, self.certificate, mount_point="grimoirelab"
+        )
+        result = manager.get_secret("test_service")
+
+        self.assertEqual(result, self.mock_secret_response)
+        mock_instance.secrets.kv.read_secret.assert_called_once_with(
+            path="test_service", mount_point="grimoirelab"
+        )
 
     @patch("hvac.Client")
     def test_get_secret_not_found(self, mock_hvac_client):
@@ -114,6 +144,7 @@ class TestHashicorpManager(unittest.TestCase):
 
         self.assertIn("nonexistent_service", str(context.exception))
         self.assertIn("not found", str(context.exception))
+        self.assertIn("mount 'secret'", str(context.exception))
 
     @patch("hvac.Client")
     def test_get_secret_permission_denied(self, mock_hvac_client):

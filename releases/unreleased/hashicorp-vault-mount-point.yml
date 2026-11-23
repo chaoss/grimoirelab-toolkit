@@ -1,0 +1,10 @@
+---
+title: Mount point for HashiCorp Vault secrets
+category: added
+author: Santiago Dueñas <sduenas@grimoirelab.org>
+issue: null
+notes: >
+  `HashicorpManager` accepts the parameter `mount_point`
+  to read secrets from a KV version 2 secrets engine mounted
+  at a path other than `secret`. This allows using a dedicated
+  engine for GrimoireLab in HashiCorp Vault or OpenBao.

@@ -213,6 +213,19 @@ github_secret = hc_manager.get_secret("github")
 elasticsearch_secret = hc_manager.get_secret("elasticsearch")
 ```
 
+Secrets are read from a KV version 2 secrets engine. By default, the
+engine mounted at `secret` is used, so `get_secret("github")` reads the
+secret `secret/github`. Use the `mount_point` parameter to read secrets
+from an engine mounted at a different path (e.g. a dedicated engine
+for GrimoireLab in Vault or OpenBao):
+
+```python
+hc_manager = HashicorpManager("https://vault.example.com", "your_token", mount_point="grimoirelab")
+
+# Reads the secret 'grimoirelab/github'
+github_secret = hc_manager.get_secret("github")
+```
+
 #### Response format
 
 When calling `get_secret(item_name)`, the method returns a JSON object with the following structure:
@@ -295,7 +308,7 @@ credentials = bw_manager.resolve_credentials("GitHub", ["api_token", "user"])
 
 # HashiCorp example
 hc_manager = HashicorpManager("https://vault.example.com", "hvs.your-token")
-credentials = hc_manager.resolve_credentials("secret/my-service", ["api_token"])
+credentials = hc_manager.resolve_credentials("my-service", ["api_token"])
 ```
 
 #### Parameters
