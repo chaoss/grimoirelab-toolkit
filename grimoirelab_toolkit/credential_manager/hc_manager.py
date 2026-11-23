@@ -25,6 +25,8 @@ from .exceptions import CredentialNotFoundError, HashicorpVaultError
 
 logger = logging.getLogger(__name__)
 
+DEFAULT_MOUNT_POINT = "secret"
+
 
 class HashicorpManager(CredentialManager):
     """Retrieve credentials from HashiCorp Vault.
@@ -44,7 +46,13 @@ class HashicorpManager(CredentialManager):
     included, so the user can choose to store it and retrieve desired data.
     """
 
-    def __init__(self, vault_url: str, token: str, certificate: str | bool | None = None):
+    def __init__(
+        self,
+        vault_url: str,
+        token: str,
+        certificate: str | bool | None = None,
+        mount_point: str = DEFAULT_MOUNT_POINT,
+    ):
         """
         Creates HashicorpManager object using token authentication
 
@@ -53,10 +61,13 @@ class HashicorpManager(CredentialManager):
         :param Union[str, bool, None] certificate: TLS verification setting. Either a boolean to indicate whether TLS
             verification should be performed, a string pointing at the CA bundle to use for
             verification
+        :param str mount_point: Path where the KV version 2 secrets engine is mounted.
+            Secrets are read relative to this path.
 
         """
         logger.debug("Creating Vault client")
         self.client = hvac.Client(url=vault_url, token=token, verify=certificate)
+        self.mount_point = mount_point
         logger.debug("Vault client initialized successfully")
 
     def get_secret(self, item_name: str) -> dict:
@@ -64,6 +75,9 @@ class HashicorpManager(CredentialManager):
 
         Retrieves all the fields stored for an item with the name
         provided as an argument and returns them as a dictionary.
+        The name is the path of the secret relative to the mount
+        point of the secrets engine (e.g. "github" reads the secret
+        "secret/github" when the mount point is "secret").
 
         The returned dictionary includes fields such as:
         - data: The actual secret data and metadata
@@ -79,13 +93,19 @@ class HashicorpManager(CredentialManager):
         :raises HashicorpVaultError: If Vault operations fail
         """
         try:
-            logger.debug("Retrieving credentials from vault: %s", item_name)
+            logger.debug("Retrieving credentials from vault: %s/%s", self.mount_point, item_name)
             # Read secret from KV secrets engine
-            secret = self.client.secrets.kv.read_secret(path=item_name)
+            secret = self.client.secrets.kv.read_secret(
+                path=item_name, mount_point=self.mount_point
+            )
             return secret
         except hvac.exceptions.InvalidPath:
-            logger.error("The path %s does not exist in the vault", item_name)
-            raise CredentialNotFoundError(f"Secret path '{item_name}' not found in Vault")
+            logger.error(
+                "The path %s does not exist in the vault mount %s", item_name, self.mount_point
+            )
+            raise CredentialNotFoundError(
+                f"Secret path '{item_name}' not found in Vault mount '{self.mount_point}'"
+            )
         except Exception as e:
             logger.error("Error retrieving the secret: %s", str(e))
             raise HashicorpVaultError(f"Vault operation failed: {e}") from e
