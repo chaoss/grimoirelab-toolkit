@@ -16,8 +16,17 @@
 #
 
 
+# The built-in managers must be imported, so they are registered
+# as subclasses of 'CredentialManager' (see 'available_managers')
 from .bw_manager import BitwardenManager
-from .credential_manager import CredentialManager
+from .credential_manager import (
+    CredentialManager,
+    ManagerParameter,
+    ManagerSpec,
+    Secret,
+    available_managers,
+    create_credential_manager,
+)
 from .exceptions import (
     BitwardenCLIError,
     CredentialManagerError,
@@ -25,6 +34,7 @@ from .exceptions import (
     HashicorpVaultError,
     InvalidCredentialsError,
 )
+from .hc_manager import HashicorpManager
 
 __all__ = [
     "BitwardenCLIError",
@@ -32,6 +42,12 @@ __all__ = [
     "CredentialManager",
     "CredentialManagerError",
     "CredentialNotFoundError",
+    "HashicorpManager",
     "HashicorpVaultError",
     "InvalidCredentialsError",
+    "ManagerParameter",
+    "ManagerSpec",
+    "Secret",
+    "available_managers",
+    "create_credential_manager",
 ]

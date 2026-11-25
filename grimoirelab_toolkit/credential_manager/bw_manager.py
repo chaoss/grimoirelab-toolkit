@@ -22,8 +22,9 @@ import os
 import shutil
 import subprocess
 import tempfile
+from typing import Annotated
 
-from .credential_manager import CredentialManager
+from .credential_manager import CredentialManager, Secret
 from .exceptions import (
     BitwardenCLIError,
     CredentialNotFoundError,
@@ -60,7 +61,16 @@ class BitwardenManager(CredentialManager):
     The path of Bitwarden CLI (bw) is retrieved using shutil.
     """
 
-    def __init__(self, client_id: str, client_secret: str, master_password: str):
+    NAME = "bitwarden"
+    TITLE = "Bitwarden"
+    PREFIX = "bw"
+
+    def __init__(
+        self,
+        client_id: Annotated[str, "Bitwarden API client ID"],
+        client_secret: Annotated[str, Secret("Bitwarden API client secret")],
+        master_password: Annotated[str, Secret("Bitwarden master password")],
+    ):
         """
         Creates BitwardenManager object using API key authentication
 

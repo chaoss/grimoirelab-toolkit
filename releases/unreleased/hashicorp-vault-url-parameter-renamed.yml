@@ -1,0 +1,9 @@
+---
+title: HashiCorp Vault URL parameter renamed
+category: changed
+author: Santiago Dueñas <sduenas@grimoirelab.org>
+issue: null
+notes: >
+  The parameter `vault_url` of `HashicorpManager` is renamed
+  to `url`. Code that passes it by keyword must use the new
+  name, e.g. `HashicorpManager(url=..., token=...)`.
