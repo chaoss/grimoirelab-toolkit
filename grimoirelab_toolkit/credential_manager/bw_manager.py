@@ -22,6 +22,7 @@ import os
 import shutil
 import subprocess
 import tempfile
+from typing import Any
 
 from .credential_manager import CredentialManager
 from .exceptions import (
@@ -60,7 +61,7 @@ class BitwardenManager(CredentialManager):
     The path of Bitwarden CLI (bw) is retrieved using shutil.
     """
 
-    def __init__(self, client_id: str, client_secret: str, master_password: str):
+    def __init__(self, client_id: str, client_secret: str, master_password: str) -> None:
         """
         Creates BitwardenManager object using API key authentication
 
@@ -69,7 +70,7 @@ class BitwardenManager(CredentialManager):
         :param str master_password: Master password for unlocking the vault
         """
         # Session key of the bw session
-        self.session_key = None
+        self.session_key: str | None = None
 
         # API credentials
         self.client_id = client_id
@@ -77,9 +78,10 @@ class BitwardenManager(CredentialManager):
         self.master_password = master_password
 
         # Get the absolute path to the bw executable
-        self.bw_path = shutil.which("bw")
-        if not self.bw_path:
+        bw_path = shutil.which("bw")
+        if not bw_path:
             raise BitwardenCLIError("Bitwarden CLI (bw) not found in PATH")
+        self.bw_path = bw_path
 
         # Each instance gets its own appdata dir so parallel sessions
         # don't share state and bw can find its config directory.
@@ -94,7 +96,7 @@ class BitwardenManager(CredentialManager):
             }
         )
 
-    def login(self) -> str | None:
+    def login(self) -> str:
         """Log into Bitwarden.
 
         Use the API authentication key to log in and unlock the vault. After it,
@@ -156,7 +158,7 @@ class BitwardenManager(CredentialManager):
 
         return session_key
 
-    def get_secret(self, item_name: str) -> dict:
+    def get_secret(self, item_name: str) -> dict[str, Any]:
         """Retrieve an item from the Bitwarden vault.
 
         Retrieves all the fields stored for an item with the name
@@ -227,7 +229,7 @@ class BitwardenManager(CredentialManager):
 
         logger.info("Successfully logged out from Bitwarden")
 
-    def extract_field(self, secret: dict, field_name: str) -> str | None:
+    def extract_field(self, secret: dict[str, Any], field_name: str) -> Any:
         """Extract a field value from a Bitwarden item.
 
         Searches in the 'login' dict first, then in the 'fields' array.
@@ -236,7 +238,6 @@ class BitwardenManager(CredentialManager):
         :param str field_name: The name of the field to extract
 
         :returns: The field value or None if not found
-        :rtype: str or None
         """
         login_data = secret.get("login", {})
         if login_data and field_name in login_data:

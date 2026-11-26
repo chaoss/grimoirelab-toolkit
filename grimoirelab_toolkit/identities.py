@@ -23,7 +23,7 @@ import hashlib
 import unicodedata
 
 
-def unaccent_string(unistr):
+def unaccent_string(unistr: str) -> str:
     """Convert a Unicode string to its canonical form without accents.
 
     This allows to convert Unicode strings which include accent
@@ -45,7 +45,9 @@ def unaccent_string(unistr):
     return string
 
 
-def generate_uuid(source, email=None, name=None, username=None):
+def generate_uuid(
+    source: object, email: object = None, name: object = None, username: object = None
+) -> str:
     """Generate a UUID related to identity data.
 
     Based on the input data, the function will return the UUID
@@ -77,7 +79,7 @@ def generate_uuid(source, email=None, name=None, username=None):
         of the parameters is `None`; or the parameters are empty.
     """
 
-    def to_str(value, unaccent=False):
+    def to_str(value: object, unaccent: bool = False) -> str:
         s = str(value)
         if unaccent:
             return unaccent_string(s)
@@ -94,9 +96,7 @@ def generate_uuid(source, email=None, name=None, username=None):
     s = ":".join(
         (to_str(source), to_str(email), to_str(name, unaccent=True), to_str(username))
     ).lower()
-    s = s.encode("UTF-8", errors="surrogateescape")
-
-    sha1 = hashlib.sha1(s)
+    sha1 = hashlib.sha1(s.encode("UTF-8", errors="surrogateescape"))
     uuid_ = sha1.hexdigest()
 
     return uuid_

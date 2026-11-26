@@ -17,6 +17,8 @@
 
 
 import logging
+from collections.abc import Iterable
+from typing import Any
 
 logger = logging.getLogger(__name__)
 
@@ -34,7 +36,7 @@ class CredentialManager:
     override `login` and `logout`.
     """
 
-    def get_secret(self, secret_name: str) -> dict:
+    def get_secret(self, secret_name: str) -> dict[str, Any]:
         """Retrieve a secret item from the vault.
 
         :param str secret_name: The name/path of the secret item
@@ -44,39 +46,37 @@ class CredentialManager:
         """
         raise NotImplementedError
 
-    def extract_field(self, secret: dict, field_name: str) -> str | None:
+    def extract_field(self, secret: dict[str, Any], field_name: str) -> Any:
         """Extract a single field value from a secret item.
 
         :param dict secret: The secret dictionary returned by `get_secret`
         :param str field_name: The name of the field to extract
 
         :returns: The field value, or None if not found
-        :rtype: str or None
         """
         raise NotImplementedError
 
-    def login(self):
+    def login(self) -> str | None:
         """Log into the secrets manager. No-op by default."""
 
-    def logout(self):
+    def logout(self) -> None:
         """Log out from the secrets manager. No-op by default."""
 
     def resolve_credentials(
         self,
         secret_name: str,
-        field_names: list[str],
-    ) -> dict[str, str]:
+        field_names: Iterable[str],
+    ) -> dict[str, Any]:
         """Resolve credentials from the secrets manager.
 
         Fetches a secret item and extracts the requested fields.
         Handles login/logout lifecycle automatically.
 
         :param str secret_name: Name/path of the secret item in the vault
-        :param list field_names: List of field names to extract
+        :param field_names: Iterable of field names to extract
 
         :returns: Dict mapping field names to their resolved values.
             Only fields that were found are included.
-        :rtype: dict[str, str]
 
         :raises ValueError: If secret_name is empty
         """

@@ -16,6 +16,7 @@
 #
 
 import logging
+from typing import Any
 
 import hvac
 import hvac.exceptions
@@ -52,7 +53,7 @@ class HashicorpManager(CredentialManager):
         token: str,
         certificate: str | bool | None = None,
         mount_point: str = DEFAULT_MOUNT_POINT,
-    ):
+    ) -> None:
         """
         Creates HashicorpManager object using token authentication
 
@@ -66,11 +67,11 @@ class HashicorpManager(CredentialManager):
 
         """
         logger.debug("Creating Vault client")
-        self.client = hvac.Client(url=vault_url, token=token, verify=certificate)
+        self.client: hvac.Client = hvac.Client(url=vault_url, token=token, verify=certificate)
         self.mount_point = mount_point
         logger.debug("Vault client initialized successfully")
 
-    def get_secret(self, item_name: str) -> dict:
+    def get_secret(self, item_name: str) -> dict[str, Any]:
         """Retrieve an item from the HashiCorp Vault.
 
         Retrieves all the fields stored for an item with the name
@@ -110,7 +111,7 @@ class HashicorpManager(CredentialManager):
             logger.error("Error retrieving the secret: %s", str(e))
             raise HashicorpVaultError(f"Vault operation failed: {e}") from e
 
-    def extract_field(self, secret: dict, field_name: str) -> str | None:
+    def extract_field(self, secret: dict[str, Any], field_name: str) -> Any:
         """Extract a field value from a HashiCorp Vault secret.
 
         Reads from secret['data']['data'][field_name].
@@ -119,7 +120,6 @@ class HashicorpManager(CredentialManager):
         :param str field_name: The name of the field to extract
 
         :returns: The field value or None if not found
-        :rtype: str or None
         """
         secret_data = secret.get("data", {}).get("data", {})
         return secret_data.get(field_name)
