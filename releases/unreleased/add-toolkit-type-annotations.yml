@@ -1,0 +1,7 @@
+---
+title: Add type annotations to GrimoireLab Toolkit
+category: other
+author: Caligula-95 <93405075+Caligula-95@users.noreply.github.com>
+notes: >
+  Complete and improve type annotations for Toolkit utilities and
+  credential managers so applications can check their use of these APIs.

@@ -28,19 +28,25 @@ such as `inspect`.
 """
 
 import inspect
+from collections.abc import Callable, Container, Mapping
+from typing import TypeVar, overload
 
 __all__ = ["find_class_properties", "find_signature_parameters", "inspect_signature_parameters"]
 
+_T = TypeVar("_T")
 
-def inspect_signature_parameters(callable_, excluded=None):
+
+def inspect_signature_parameters(
+    callable_: Callable[..., object], excluded: Container[str] | None = None
+) -> list[inspect.Parameter]:
     """Get the parameters of a callable.
 
     Returns a list with the signature parameters of `callable_`.
-    Parameters contained in `excluded` tuple will not be included
+    Parameters contained in `excluded` will not be included
     in the result.
 
     :param callable_: callable object
-    :param excluded: tuple with default parameters to exclude
+    :param excluded: parameter names to exclude
 
     :result: list of parameters
     """
@@ -52,26 +58,47 @@ def inspect_signature_parameters(callable_, excluded=None):
     return params
 
 
-def find_signature_parameters(callable_, candidates, excluded=("self", "cls")):
+@overload
+def find_signature_parameters(
+    callable_: Callable[..., object],
+    candidates: dict[str, _T],
+    excluded: Container[str] | None = ("self", "cls"),
+) -> dict[str, _T]: ...
+
+
+@overload
+def find_signature_parameters(
+    callable_: Callable[..., object],
+    candidates: Mapping[str, _T],
+    excluded: Container[str] | None = ("self", "cls"),
+) -> Mapping[str, _T]: ...
+
+
+def find_signature_parameters(
+    callable_: Callable[..., object],
+    candidates: Mapping[str, _T],
+    excluded: Container[str] | None = ("self", "cls"),
+) -> Mapping[str, _T]:
     """Find on a set of candidates the parameters needed to execute a callable.
 
-    Returns a dictionary with the `candidates` found on `callable_`.
+    Returns a mapping with the `candidates` found on `callable_`.
+    For variadic signatures the original mapping is returned.
     When any of the required parameters of a callable is not found,
     it raises a `AttributeError` exception. A signature parameter
     whitout a default value is considered as required.
 
     :param callable_: callable object
-    :param candidates: dict with the possible parameters to use
+    :param candidates: mapping with the possible parameters to use
         with the callable
-    :param excluded: tuple with default parameters to exclude
+    :param excluded: parameter names to exclude
 
-    :result: dict of parameters ready to use with the callable
+    :result: mapping of parameters ready to use with the callable
 
     :raises AttributeError: when any of the required parameters for
         executing a callable is not found in `candidates`
     """
     signature_params = inspect_signature_parameters(callable_, excluded=excluded)
-    exec_params = {}
+    exec_params: dict[str, _T] = {}
 
     add_all = False
     for param in signature_params:
@@ -88,12 +115,12 @@ def find_signature_parameters(callable_, candidates, excluded=("self", "cls")):
             continue
 
     if add_all:
-        exec_params = candidates
+        return candidates
 
     return exec_params
 
 
-def find_class_properties(cls):
+def find_class_properties(cls: object) -> list[tuple[str, property]]:
     """Find property members in a class.
 
     Returns all the property members of a class in a list of

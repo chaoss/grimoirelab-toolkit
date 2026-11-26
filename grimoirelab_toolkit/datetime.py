@@ -51,21 +51,21 @@ class InvalidDateError(Exception):
 
     message = "%(date)s is not a valid date"
 
-    def __init__(self, **kwargs):
+    def __init__(self, **kwargs: object) -> None:
         super().__init__()
         self.msg = self.message % kwargs
 
-    def __str__(self):
+    def __str__(self) -> str:
         return self.msg
 
 
-def datetime_utcnow():
+def datetime_utcnow() -> datetime.datetime:
     """Handy function which returns the current date and time in UTC."""
 
     return datetime.datetime.now(datetime.UTC)
 
 
-def datetime_to_utc(ts):
+def datetime_to_utc(ts: datetime.datetime) -> datetime.datetime:
     """Convert a timestamp to UTC+0 timezone.
 
     Returns the given datetime object converted to a date with
@@ -73,7 +73,7 @@ def datetime_to_utc(ts):
     they are in UTC+0. When the timezone is wrong, UTC+0 will
     be set as default (using `dateutil.tz.tzutc` object).
 
-    :param dt: timestamp to convert
+    :param ts: timestamp to convert
 
     :returns: a datetime object
 
@@ -97,7 +97,7 @@ def datetime_to_utc(ts):
     return ts
 
 
-def str_to_datetime(ts):
+def str_to_datetime(ts: str) -> datetime.datetime:
     """Format a string to a datetime object.
 
     This functions supports several date formats like YYYY-MM-DD,
@@ -109,11 +109,11 @@ def str_to_datetime(ts):
 
     :returns: a datetime object
 
-    :raises IvalidDateError: when the given string cannot be converted
+    :raises InvalidDateError: when the given string cannot be converted
         on a valid date
     """
 
-    def parse_datetime(ts):
+    def parse_datetime(ts: str) -> datetime.datetime:
         dt = dateutil.parser.parse(ts)
         if not dt.tzinfo:
             dt = dt.replace(tzinfo=dateutil.tz.tzutc())
@@ -167,7 +167,7 @@ def str_to_datetime(ts):
         raise InvalidDateError(date=str(ts))
 
 
-def unixtime_to_datetime(ut):
+def unixtime_to_datetime(ut: float) -> datetime.datetime:
     """Convert a unixtime timestamp to a datetime object.
 
     The function converts a timestamp in Unix format to a

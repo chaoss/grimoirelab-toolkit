@@ -25,7 +25,7 @@
 __all__ = ["urijoin"]
 
 
-def urijoin(*args):
+def urijoin(*args: object) -> str:
     """Joins given arguments into a URI.
 
     Trailing and leading slashes are stripped for each argument.
